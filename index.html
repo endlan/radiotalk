@@ -423,7 +423,7 @@ async function doLogin(){
   if(!u||!p){setMsg('loginMsg','⚠ ISI SEMUA FIELD','error');return;}
   setMsg('loginMsg','... CONNECTING ...','');
   try{
-    const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const d=await r.json();
     if(d.success){currentUser=d.username;isAdmin=d.isAdmin||false;showMainApp();}
     else setMsg('loginMsg','✖ '+d.message,'error');
@@ -436,7 +436,7 @@ async function doRegister(){
   if(p.length<6){setMsg('registerMsg','⚠ PASSWORD MIN 6 KARAKTER','error');return;}
   setMsg('registerMsg','... REGISTERING ...','');
   try{
-    const r=await fetch('/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const d=await r.json();
     if(d.success){setMsg('registerMsg','✔ BERHASIL! SILAKAN LOGIN','success');setTimeout(()=>switchTab('login'),1500);}
     else setMsg('registerMsg','✖ '+d.message,'error');
@@ -471,7 +471,7 @@ function doLogout(){
 // ===== CHANNEL LIST =====
 async function loadChannels(){
   try{
-    const r=await fetch('/channels');
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/channels');
     const d=await r.json();
     if(d.success){channels=d.channels;renderChannels();}
   }catch{console.error('Gagal load channels');}
@@ -523,7 +523,7 @@ async function doVerifyPass(){
   if(!pass){document.getElementById('passMsg').textContent='⚠ Masukkan sandi!';return;}
   document.getElementById('passMsg').textContent='... VERIFYING ...';
   try{
-    const r=await fetch('/channels/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channelId:pendingJoinChannel,password:pass})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/channels/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channelId:pendingJoinChannel,password:pass})});
     const d=await r.json();
     if(d.success){closeModal('modalPassword');joinChannel(pendingJoinChannel);}
     else{document.getElementById('passMsg').textContent='✖ '+d.message;}
@@ -558,7 +558,7 @@ async function doCreateChannel(){
   if(selectedType==='private'&&pass.length<4){document.getElementById('createMsg').textContent='⚠ Sandi min. 4 karakter!';return;}
   document.getElementById('createMsg').textContent='... CREATING ...';
   try{
-    const r=await fetch('/channels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,type:selectedType,password:pass,description:desc,createdBy:currentUser})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/channels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,type:selectedType,password:pass,description:desc,createdBy:currentUser})});
     const d=await r.json();
     if(d.success){
       channels.push(d.channel);
@@ -580,7 +580,7 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 // ===== SOCKET =====
-const socket=io();
+const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
 
 socket.on('channel_members',(members)=>{
@@ -677,7 +677,7 @@ async function loadAdminUsers(){
   const list=document.getElementById('adminUserList');
   list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>';
   try{
-    const r=await fetch(`/admin/users?adminUsername=${currentUser}`);
+    const r=await fetch(`https://radiotalk-production-8d66.up.railway.app/admin/users?adminUsername=${currentUser}`);
     const d=await r.json();
     if(!d.success){list.innerHTML=`<div style="font-size:9px;color:var(--red);text-align:center;padding:8px">${d.message}</div>`;return;}
     list.innerHTML='';
@@ -703,7 +703,7 @@ async function loadAdminChannels(){
   const list=document.getElementById('adminChList');
   list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>';
   try{
-    const r=await fetch('/channels');
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/channels');
     const d=await r.json();
     if(!d.success||d.channels.length===0){list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA CHANNEL</div>';return;}
     list.innerHTML='';
@@ -723,7 +723,7 @@ async function adminKick(targetUsername){
   if(!currentChannel){setAdminMsg('⚠ Kamu belum di channel manapun!',true);return;}
   if(!confirm(`Kick ${targetUsername} dari ${currentChannel}?`)) return;
   try{
-    const r=await fetch('/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
     const d=await r.json();
     setAdminMsg(d.success?`✔ ${targetUsername} dikick!`:'✖ '+d.message,!d.success);
     if(d.success) await loadAdminUsers();
@@ -733,7 +733,7 @@ async function adminKick(targetUsername){
 async function adminBan(targetUsername){
   if(!confirm(`Ban ${targetUsername}? User ini tidak bisa login lagi.`)) return;
   try{
-    const r=await fetch('/admin/ban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/ban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
     const d=await r.json();
     setAdminMsg(d.success?`✔ ${targetUsername} dibanned!`:'✖ '+d.message,!d.success);
     if(d.success) await loadAdminUsers();
@@ -742,7 +742,7 @@ async function adminBan(targetUsername){
 
 async function adminUnban(targetUsername){
   try{
-    const r=await fetch('/admin/unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
     const d=await r.json();
     setAdminMsg(d.success?`✔ ${targetUsername} di-unban!`:'✖ '+d.message,!d.success);
     if(d.success) await loadAdminUsers();
@@ -752,7 +752,7 @@ async function adminUnban(targetUsername){
 async function adminDeleteChannel(channelId){
   if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
   try{
-    const r=await fetch(`/admin/channel/${channelId}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser})});
+    const r=await fetch(`https://radiotalk-production-8d66.up.railway.app/admin/channel/${channelId}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser})});
     const d=await r.json();
     setAdminMsg(d.success?`✔ Channel ${channelId} dihapus!`:'✖ '+d.message,!d.success);
     if(d.success){await loadAdminChannels();await loadChannels();}
