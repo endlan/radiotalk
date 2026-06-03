@@ -3,7 +3,14 @@ const http = require('http');
 const { Server } = require('socket.io');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
-const serviceAccount = require('./serviceAccount.json');
+
+// Baca dari env variable (Railway) atau file lokal (Termux)
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  serviceAccount = require('./serviceAccount.json');
+}
 
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
