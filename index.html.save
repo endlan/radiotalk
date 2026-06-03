@@ -1,0 +1,646 @@
+cp /sdcard/Download/index.html ~/walkie-talkie/<!DOCTYPE html> <html 
+lang="id"> <head> cp /sdcard/Download/index.html ~/walkie-talkie/ 
+<meta charset="UTF-8"> cp /sdcard/Download/index.html 
+~/walkie-talkie/index.html && echo "BERHASIL" <meta name="viewport" 
+content="width=device-width, initial-scale=1.0">
+  <title>RadioTalk</title> <link 
+  href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" 
+  rel="stylesheet"> <style>
+    :root {
+      --black: #0a0a0a; --dark: #141414; --panel: #1a1a1a; --metal: 
+      #222222; --border: #2a2a2a; --orange: #ff6a00; --orange-dim: 
+      #cc5500; --orange-glow: rgba(255,106,0,0.3); --red: #ff2200; 
+      --red-glow: rgba(255,34,0,0.5); --green: #00ff88; --green-dim: 
+      rgba(0,255,136,0.15); --text: #e0e0e0; --text-dim: #888; 
+      --screw: #333;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { background: #c8b89a; min-height: 100vh; display: flex; 
+      align-items: center; justify-content: center; font-family: 
+      'Share Tech Mono', monospace; background-image:
+pkill node && node server.js radial-gradient(ellipse at 50% 0%, 
+        rgba(255,106,0,0.05) 0%, transparent 60%), 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, 
+        rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px);
+    }
+
+    .ht-body { width: 320px; background: linear-gradient(160deg, 
+      #2a2a2a 0%, #1a1a1a 40%, #111 100%); border-radius: 24px 24px 
+      40px 40px; border: 1px solid #333; box-shadow: 0 0 0 1px #000, 
+        4px 4px 12px rgba(0,0,0,0.8), -2px -2px 6px 
+        rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06), 
+        0 20px 60px rgba(0,0,0,0.9);
+      padding: 16px; position: relative; sed -i 's/background: 
+#2c1a0e/background: #c8b89a/' ~/walkie-talkie/index.html && echo "OK" 
+}
+
+    /* Screws */ .screw { width: 10px; height: 10px; background: 
+      radial-gradient(circle at 35% 35%, #555, #222); border-radius: 
+      50%; border: 1px solid #111; position: absolute; box-shadow: 
+      inset 0 1px 2px rgba(0,0,0,0.8);
+    }
+    .screw::after { content: '+'; position: absolute; top: 50%; left: 
+      50%; transform: translate(-50%, -50%); font-size: 7px; color: 
+      #444; line-height: 1;
+    }
+    .screw-tl { top: 12px; left: 12px; } .screw-tr { top: 12px; 
+    right: 12px; } .screw-bl { bottom: 20px; left: 12px; } .screw-br 
+    { bottom: 20px; right: 12px; }
+
+    /* Antenna */ .antenna { width: 10px; height: 80px; background: 
+      linear-gradient(to right, #333, #555, #333); border-radius: 4px 
+      4px 0 0; margin: -80px auto 0; position: relative; box-shadow: 
+      2px 0 4px rgba(0,0,0,0.5);
+    }
+    .antenna::before { content: ''; position: absolute; top: -6px; 
+      left: 50%; transform: translateX(-50%); width: 14px; height: 
+      6px; background: #444; border-radius: 3px;
+    }
+
+    /* Speaker grille */ .speaker { background: #111; border-radius: 
+      10px; padding: 10px; margin-bottom: 12px; border: 1px solid 
+      #2a2a2a; box-shadow: inset 0 2px 6px rgba(0,0,0,0.8); position: 
+      relative;
+    }
+    .speaker-grille { display: grid; grid-template-columns: 
+      repeat(12, 1fr); gap: 3px; height: 36px;
+    }
+    .speaker-dot { background: #c8b89a; border-radius: 50%; 
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.9), 0 0 0 0.5px #222;
+    }
+    .speaker-label { position: absolute; right: 10px; top: 50%; 
+      transform: translateY(-50%); font-size: 7px; color: #444; 
+      letter-spacing: 2px; font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Screen */ .screen { grep -n "background:" 
+~/walkie-talkie/index.html | head -5 background: #050f05;
+      border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 
+      2px solid #1a2a1a; box-shadow:
+        inset 0 2px 8px rgba(0,0,0,0.9), 0 0 20px 
+        rgba(0,255,136,0.05);
+      position: relative; overflow: hidden;
+    }
+    .screen::before { content: ''; position: absolute; top: 0; left: 
+      0; right: 0; height: 40%; background: linear-gradient(to 
+      bottom, rgba(255,255,255,0.03), transparent); pointer-events: 
+      none;
+grep "background: #" ~/walkie-talkie/index.html | head -3 } 
+    .screen-scanline {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, 
+        rgba(0,0,0,0.15) 4px
+      ); pointer-events: none;
+    }
+
+    .brand { font-family: 'Orbitron', sans-serif; font-size: 9px; 
+      font-weight: 900; color: var(--orange); letter-spacing: 4px; 
+      text-shadow: 0 0 8px var(--orange-glow); margin-bottom: 8px;
+cat ~/walkie-talkie/index.html | grep "background: #" | head -3 }
+
+    .freq-display { font-family: 'Orbitron', sans-serif; font-size: 
+      22px; font-weight: 700; color: var(--green); text-shadow: 0 0 
+      12px rgba(0,255,136,0.6); letter-spacing: 2px; margin-bottom: 
+      4px;
+    }
+
+    .channel-info { display: flex; justify-content: space-between; 
+      align-items: center;
+    }
+    .ch-label { font-size: 10px; color: var(--text-dim); 
+      letter-spacing: 1px;
+    }
+    .signal-bars { display: flex; gap: 2px; align-items: flex-end;
+    }
+    .bar { width: 4px; background: var(--green); border-radius: 1px; 
+      box-shadow: 0 0 4px rgba(0,255,136,0.5); opacity: 0.3; 
+      transition: opacity 0.3s;
+ls } .bar.active { opacity: 1; } .bar:nth-child(1) { height: 4px; } 
+    .bar:nth-child(2) { height: 7px; } .bar:nth-child(3) { height: 
+    10px; } .bar:nth-child(4) { height: 13px; } .bar:nth-child(5) { 
+    height: 16px; }
+
+    .status-row { display: flex; gap: 8px; margin-top: 6px;
+    }
+    .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 
+      3px; letter-spacing: 1px;
+    }
+    .badge-on {
+      background: rgba(0,255,136,0.1);
+      color: var(--green);
+      border: 1px solid rgba(0,255,136,0.3);
+    }
+    .badge-ch {
+      background: rgba(255,106,0,0.1);
+      color: var(--orange);
+      border: 1px solid rgba(255,106,0,0.3);
+    }
+
+    /* Channel input area */
+    .input-section {
+      margin-bottom: 12px;
+    }
+    .input-label {
+      font-size: 8px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+    .channel-input {
+      flex: 1;
+      background: #c8b89a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .channel-input:focus {
+      border-color: var(--orange);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 8px var(--orange-glow);
+    }
+    .channel-input::placeholder { color: #444; }
+
+    .join-btn {
+      background: linear-gradient(to bottom, #ff7a20, #cc5500);
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255,106,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: all 0.15s;
+    }
+    .join-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px rgba(255,106,0,0.3);
+    }
+
+    /* Side controls */
+    .side-controls {
+      position: absolute;
+      right: -14px;
+      top: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .side-btn {
+      width: 14px;
+      height: 40px;
+      background: linear-gradient(to right, #2a2a2a, #3a3a3a);
+      border-radius: 0 4px 4px 0;
+      border: 1px solid #444;
+      border-left: none;
+      box-shadow: 3px 2px 6px rgba(0,0,0,0.6);
+    }
+    .side-btn.vol {
+      height: 55px;
+      background: linear-gradient(to right, #333, #444);
+    }
+
+    /* PTT Button */
+    .ptt-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .ptt-ring {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #2a2a2a, #111);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 3px #1a1a1a,
+        0 0 0 5px #2a2a2a,
+        0 6px 20px rgba(0,0,0,0.8),
+        inset 0 2px 4px rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .ptt-btn {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ff4422, #cc1100, #880000);
+      border: none;
+      cursor: pointer;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 4px 15px rgba(255,34,0,0.4),
+        0 0 30px rgba(255,34,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.15),
+        inset 0 -3px 6px rgba(0,0,0,0.4);
+      transition: all 0.1s;
+      position: relative;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .ptt-btn::before {
+      content: '';
+      position: absolute;
+      top: 10%; left: 15%;
+      width: 40%; height: 30%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.2), transparent);
+      border-radius: 50%;
+    }
+    .ptt-btn.talking {
+      background: radial-gradient(circle at 35% 30%, #ff6644, #ff2200, #aa0000);
+      box-shadow:
+        0 2px 8px rgba(255,34,0,0.6),
+        0 0 40px rgba(255,34,0,0.4),
+        inset 0 2px 4px rgba(255,255,255,0.1),
+        inset 0 -2px 4px rgba(0,0,0,0.5);
+      transform: scale(0.96) translateY(2px);
+    }
+
+    .ptt-icon {
+      font-size: 32px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    .ptt-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 2px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    /* Disabled PTT placeholder */
+    .ptt-disabled {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #2a2a2a, #1a1a1a);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #333;
+    }
+    .ptt-disabled-text {
+      font-size: 8px;
+      color: #444;
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Bottom controls */
+    .bottom-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding: 0 8px;
+    }
+    .knob {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #555, #222);
+      border: 2px solid #333;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.06);
+      position: relative;
+      cursor: pointer;
+    }
+    .knob::after {
+      content: '';
+      position: absolute;
+      top: 4px; left: 50%;
+      transform: translateX(-50%);
+      width: 3px; height: 8px;
+      background: var(--orange);
+      border-radius: 2px;
+      box-shadow: 0 0 4px var(--orange);
+    }
+    .knob-label {
+      font-size: 7px;
+      color: #555;
+      text-align: center;
+      margin-top: 3px;
+      letter-spacing: 1px;
+    }
+    .knob-wrap { text-align: center; }
+
+    .led-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+    }
+    .led {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      position: relative;
+    }
+    .led-red {
+      background: #ff2200;
+      box-shadow: 0 0 6px rgba(255,34,0,0.8);
+    }
+    .led-green {
+      background: #00cc66;
+      box-shadow: 0 0 6px rgba(0,204,102,0.8);
+      opacity: 0.3;
+      transition: opacity 0.3s;
+    }
+    .led-green.active { opacity: 1; }
+    .led-label {
+      font-size: 6px;
+      color: #444;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    /* TX indicator */
+    .tx-indicator {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: 3px;
+      text-align: center;
+      margin-top: 6px;
+      transition: all 0.2s;
+    }
+    .tx-indicator.active {
+      color: var(--red);
+      text-shadow: 0 0 8px var(--red-glow);
+    }
+
+    /* Model plate */
+    .model-plate {
+      text-align: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #222;
+    }
+    .model-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 7px;
+      color: #333;
+      letter-spacing: 3px;
+    }
+
+    /* Waveform animation */
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+    .waveform {
+      display: none;
+      gap: 2px;
+      align-items: center;
+      height: 16px;
+      margin-top: 4px;
+    }
+    .waveform.active { display: flex; }
+    .wave-bar {
+      width: 3px;
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      box-shadow: 0 0 4px rgba(0,255,136,0.5);
+      animation: wave 0.6s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .blink { animation: blink 1s infinite; }
+
+    /* Texture overlay */
+    .ht-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+
+<div style="position:relative;">
+  <!-- Antenna -->
+  <div class="antenna"></div>
+
+  <div class="ht-body">
+    <!-- Screws -->
+    <div class="screw screw-tl"></div>
+    <div class="screw screw-tr"></div>
+    <div class="screw screw-bl"></div>
+    <div class="screw screw-br"></div>
+
+    <!-- Side buttons -->
+    <div class="side-controls">
+      <div class="side-btn vol"></div>
+      <div class="side-btn"></div>
+    </div>
+
+    <!-- Speaker -->
+    <div class="speaker">
+      <div class="speaker-grille" id="speakerGrille"></div>
+      <div class="speaker-label">SPK</div>
+    </div>
+
+    <!-- Screen -->
+    <div class="screen">
+      <div class="screen-scanline"></div>
+      <div class="brand">◈ RADIOTALK ◈</div>
+      <div class="freq-display" id="freqDisplay">--- MHz</div>
+      <div class="channel-info">
+        <div>
+          <div class="ch-label" id="chLabel">NO CHANNEL</div>
+          <div class="waveform" id="waveform">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+        </div>
+        <div class="signal-bars">
+          <div class="bar active"></div>
+          <div class="bar active"></div>
+          <div class="bar active"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="status-badge badge-on blink" id="powerBadge">PWR</div>
+        <div class="status-badge badge-ch" id="statusBadge">STANDBY</div>
+      </div>
+    </div>
+
+    <!-- Channel Input -->
+    <div class="input-section">
+      <div class="input-label">▶ CHANNEL SELECT</div>
+      <div class="input-row">
+        <input class="channel-input" id="channelInput" placeholder="e.g. alpha-1" maxlength="20" />
+        <button class="join-btn" onclick="joinChannel()">TUNE</button>
+      </div>
+    </div>
+
+    <!-- PTT Button -->
+    <div class="ptt-section">
+      <div class="ptt-ring">
+        <div class="ptt-disabled" id="pttDisabled">
+          <div class="ptt-disabled-text">TUNE TO<br>CHANNEL<br>FIRST</div>
+        </div>
+        <button class="ptt-btn" id="pttBtn"
+          ontouchstart="startTalk(event)"
+          ontouchend="stopTalk(event)"
+          onmousedown="startTalk(event)"
+          onmouseup="stopTalk(event)">
+          <div class="ptt-icon">🎙️</div>
+          <div class="ptt-label">PTT</div>
+        </button>
+      </div>
+      <div class="tx-indicator" id="txIndicator">◉ TX</div>
+    </div>
+
+    <!-- Bottom controls -->
+    <div class="bottom-controls">
+      <div class="knob-wrap">
+        <div class="knob"></div>
+        <div class="knob-label">VOL</div>
+      </div>
+      <div class="led-group">
+        <div class="led led-red"></div>
+        <div class="led led-green" id="ledGreen"></div>
+        <div class="led-label">PWR RX</div>
+      </div>
+      <div class="knob-wrap">
+        <div class="knob" style="transform: rotate(90deg);"></div>
+        <div class="knob-label">SQ</div>
+      </div>
+    </div>
+
+    <!-- Model plate -->
+    <div class="model-plate">
+      <div class="model-text">RT-2600 ◈ VHF/UHF</div>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Generate speaker dots
+  const grille = document.getElementById('speakerGrille');
+  for (let i = 0; i < 48; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'speaker-dot';
+    grille.appendChild(dot);
+  }
+
+  // Fake frequency
+  function randomFreq() {
+    return (155 + Math.random() * 5).toFixed(4);
+  }
+
+  const socket = io();
+  let mediaRecorder, audioChunks = [], currentChannel = '';
+
+  function joinChannel() {
+    const val = document.getElementById('channelInput').value.trim();
+    if (!val) { alert('Masukkan nama channel!'); return; }
+    currentChannel = val;
+    socket.emit('join_channel', currentChannel);
+
+    // Update UI
+    document.getElementById('freqDisplay').textContent = randomFreq() + ' MHz';
+    document.getElementById('chLabel').textContent = 'CH: ' + currentChannel.toUpperCase();
+    document.getElementById('statusBadge').textContent = 'CONNECTED';
+    document.getElementById('pttDisabled').style.display = 'none';
+    document.getElementById('pttBtn').style.display = 'flex';
+    document.getElementById('ledGreen').classList.add('active');
+
+    // Signal bars
+    document.querySelectorAll('.bar').forEach((b, i) => {
+      b.classList.toggle('active', i < 4);
+    });
+  }
+
+  async function startTalk(e) {
+    e.preventDefault();
+    if (!currentChannel) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = () => socket.emit('voice_data', { channel: currentChannel, audio: reader.result });
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+
+      // UI feedback
+      document.getElementById('pttBtn').classList.add('talking');
+      document.getElementById('txIndicator').classList.add('active');
+      document.getElementById('statusBadge').textContent = 'TRANSMIT';
+      document.getElementById('waveform').classList.add('active');
+    } catch(err) {
+      alert('Izinkan akses mikrofon!');
+    }
+  }
+
+  function stopTalk(e) {
+    e.preventDefault();
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    document.getElementById('pttBtn').classList.remove('talking');
+    document.getElementById('txIndicator').classList.remove('active');
+    document.getElementById('statusBadge').textContent = 'CONNECTED';
+    document.getElementById('waveform').classList.remove('active');
+  }
+
+  socket.on('voice_data', (audioData) => {
+    const audio = new Audio(audioData);
+    audio.play();
+    // RX indicator
+    document.getElementById('statusBadge').textContent = 'RECEIVE';
+    setTimeout(() => {
+      if (currentChannel) document.getElementById('statusBadge').textContent = 'CONNECTED';
+    }, 2000);
+  });
+</script>
+</body>
+</html>
