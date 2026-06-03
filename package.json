@@ -13,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "@capacitor/android": "^8.4.0",
+    "@capacitor/preferences": "^8.0.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
