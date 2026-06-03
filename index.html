@@ -184,9 +184,67 @@
     .btn-cancel{flex:1;background:transparent;border:1px solid #333;border-radius:5px;padding:8px;color:#555;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer}
     .btn-ok{flex:2;background:linear-gradient(135deg,var(--orange),var(--orange-dim));border:none;border-radius:5px;padding:8px;color:#000;font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 0 14px rgba(255,106,0,0.3)}
     .btn-ok:active{transform:translateY(1px)}
+
+    /* ADMIN PANEL */
+    .admin-btn{width:100%;background:rgba(255,34,0,0.05);border:1px dashed rgba(255,34,0,0.35);border-radius:8px;padding:6px;color:var(--red);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;display:none;align-items:center;justify-content:center;gap:6px;transition:all 0.2s}
+    .admin-btn:hover{background:rgba(255,34,0,0.12);border-color:var(--red)}
+    .admin-btn.show{display:flex}
+
+    /* ADMIN MODAL */
+    .admin-section{margin-bottom:12px}
+    .admin-section-title{font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .admin-section-title::after{content:'';flex:1;height:1px;background:#2a2a2a}
+    .admin-user-list{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto}
+    .admin-user-list::-webkit-scrollbar{width:3px} .admin-user-list::-webkit-scrollbar-thumb{background:#333}
+    .admin-user-item{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:6px}
+    .admin-user-item.banned{border-color:rgba(255,34,0,0.2);background:rgba(255,34,0,0.03)}
+    .admin-user-name{flex:1;font-size:10px;color:var(--text);letter-spacing:1px}
+    .admin-user-name.banned{color:#555;text-decoration:line-through}
+    .admin-badge{font-size:6px;padding:1px 4px;border-radius:2px;letter-spacing:1px;margin-right:2px}
+    .badge-admin{background:rgba(255,106,0,0.1);color:var(--orange);border:1px solid rgba(255,106,0,0.3)}
+    .badge-ban{background:rgba(255,34,0,0.1);color:var(--red);border:1px solid rgba(255,34,0,0.3)}
+    .admin-action-btn{font-size:7px;padding:2px 5px;border-radius:3px;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:1px;border:none;transition:all 0.15s}
+    .btn-kick{background:rgba(255,204,0,0.1);color:var(--gold);border:1px solid rgba(255,204,0,0.3)}
+    .btn-kick:hover{background:rgba(255,204,0,0.2)}
+    .btn-ban{background:rgba(255,34,0,0.1);color:var(--red);border:1px solid rgba(255,34,0,0.3)}
+    .btn-ban:hover{background:rgba(255,34,0,0.2)}
+    .btn-unban{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.3)}
+    .btn-unban:hover{background:rgba(0,255,136,0.2)}
+
+    .admin-ch-list{display:flex;flex-direction:column;gap:5px;max-height:120px;overflow-y:auto}
+    .admin-ch-item{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:6px}
+    .admin-ch-name{flex:1;font-size:10px;color:var(--text);letter-spacing:1px}
+    .btn-del-ch{background:rgba(255,34,0,0.1);color:var(--red);border:1px solid rgba(255,34,0,0.3);font-size:7px;padding:2px 5px;border-radius:3px;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:1px}
+    .btn-del-ch:hover{background:rgba(255,34,0,0.2)}
+    .admin-msg{font-size:9px;text-align:center;margin-top:6px;min-height:14px;letter-spacing:1px;color:var(--green)}
+    .admin-msg.err{color:var(--red)}
   </style>
 </head>
 <body>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="modalAdmin">
+  <div class="modal-box" style="max-width:310px">
+    <div class="modal-title">⚡ ADMIN PANEL</div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">▷ USERS</div>
+      <div class="admin-user-list" id="adminUserList">
+        <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">▷ CHANNELS</div>
+      <div class="admin-ch-list" id="adminChList">
+        <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
+      </div>
+    </div>
+
+    <div class="admin-msg" id="adminMsg"></div>
+    <button class="btn-cancel" style="width:100%;margin-top:4px" onclick="closeModal('modalAdmin')">TUTUP</button>
+  </div>
+</div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modalCreate">
@@ -294,6 +352,7 @@
         <div class="user-bar-name">◈ <span id="userDisplay"></span></div>
         <button class="logout-btn" onclick="doLogout()">LOGOUT</button>
       </div>
+      <button class="admin-btn" id="adminPanelBtn" onclick="openAdminPanel()">⚡ ADMIN PANEL</button>
 
       <div class="section-label">▷ CHANNELS</div>
       <button class="create-ch-btn" onclick="openModal('modalCreate')">＋ BUAT CHANNEL BARU</button>
@@ -347,7 +406,7 @@ function randomFreq(){return(155+Math.random()*5).toFixed(4);}
 
 // ===== STATE =====
 let currentUser=null, currentChannel=null, talkingUser=null;
-let channels=[], pendingJoinChannel=null, selectedType='public';
+let channels=[], pendingJoinChannel=null, selectedType='public', isAdmin=false;
 
 // ===== AUTH =====
 function switchTab(tab){
@@ -366,7 +425,7 @@ async function doLogin(){
   try{
     const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const d=await r.json();
-    if(d.success){currentUser=d.username;showMainApp();}
+    if(d.success){currentUser=d.username;isAdmin=d.isAdmin||false;showMainApp();}
     else setMsg('loginMsg','✖ '+d.message,'error');
   }catch{setMsg('loginMsg','✖ SERVER ERROR','error');}
 }
@@ -389,12 +448,14 @@ function showMainApp(){
   document.getElementById('userDisplay').textContent=currentUser.toUpperCase();
   document.getElementById('statusBadge').textContent='STANDBY';
   document.getElementById('freqDisplay').textContent=randomFreq()+' MHz';
+  if(isAdmin) document.getElementById('adminPanelBtn').classList.add('show');
   socket.emit('set_username',currentUser);
   loadChannels();
 }
 function doLogout(){
   socket.emit('leave_channel');
-  currentUser=null; currentChannel=null;
+  currentUser=null; currentChannel=null; isAdmin=false;
+  document.getElementById('adminPanelBtn').classList.remove('show');
   document.getElementById('authScreen').style.display='block';
   document.getElementById('mainApp').style.display='none';
   document.getElementById('freqDisplay').textContent='--- MHz';
@@ -602,6 +663,138 @@ function stopTalk(e){
 }
 socket.on('voice_data',(audioData)=>{
   const audio=new Audio(audioData);audio.play();
+});
+
+// ===== ADMIN PANEL =====
+async function openAdminPanel(){
+  openModal('modalAdmin');
+  document.getElementById('adminMsg').textContent='';
+  await loadAdminUsers();
+  await loadAdminChannels();
+}
+
+async function loadAdminUsers(){
+  const list=document.getElementById('adminUserList');
+  list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>';
+  try{
+    const r=await fetch(`/admin/users?adminUsername=${currentUser}`);
+    const d=await r.json();
+    if(!d.success){list.innerHTML=`<div style="font-size:9px;color:var(--red);text-align:center;padding:8px">${d.message}</div>`;return;}
+    list.innerHTML='';
+    d.users.forEach(u=>{
+      if(u.username===currentUser) return; // skip self
+      const div=document.createElement('div');
+      div.className=`admin-user-item${u.banned?' banned':''}`;
+      div.innerHTML=`
+        <div class="admin-user-name${u.banned?' banned':''}">${u.username.toUpperCase()}</div>
+        ${u.isAdmin?'<span class="admin-badge badge-admin">ADMIN</span>':''}
+        ${u.banned?'<span class="admin-badge badge-ban">BANNED</span>':''}
+        ${!u.isAdmin&&!u.banned&&currentChannel?`<button class="admin-action-btn btn-kick" onclick="adminKick('${u.username}')">KICK</button>`:''}
+        ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn btn-ban" onclick="adminBan('${u.username}')">BAN</button>`:''}
+        ${u.banned?`<button class="admin-action-btn btn-unban" onclick="adminUnban('${u.username}')">UNBAN</button>`:''}
+      `;
+      list.appendChild(div);
+    });
+    if(list.children.length===0) list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA USER LAIN</div>';
+  }catch{list.innerHTML='<div style="font-size:9px;color:var(--red);text-align:center">SERVER ERROR</div>';}
+}
+
+async function loadAdminChannels(){
+  const list=document.getElementById('adminChList');
+  list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>';
+  try{
+    const r=await fetch('/channels');
+    const d=await r.json();
+    if(!d.success||d.channels.length===0){list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA CHANNEL</div>';return;}
+    list.innerHTML='';
+    d.channels.forEach(ch=>{
+      const div=document.createElement('div');
+      div.className='admin-ch-item';
+      div.innerHTML=`
+        <div class="admin-ch-name">${ch.name.toUpperCase()} <span style="font-size:8px;color:#444">${ch.type==='private'?'🔒':''} ${ch.memberCount} user</span></div>
+        <button class="btn-del-ch" onclick="adminDeleteChannel('${ch.id}')">HAPUS</button>
+      `;
+      list.appendChild(div);
+    });
+  }catch{list.innerHTML='<div style="font-size:9px;color:var(--red);text-align:center">SERVER ERROR</div>';}
+}
+
+async function adminKick(targetUsername){
+  if(!currentChannel){setAdminMsg('⚠ Kamu belum di channel manapun!',true);return;}
+  if(!confirm(`Kick ${targetUsername} dari ${currentChannel}?`)) return;
+  try{
+    const r=await fetch('/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ ${targetUsername} dikick!`:'✖ '+d.message,!d.success);
+    if(d.success) await loadAdminUsers();
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
+
+async function adminBan(targetUsername){
+  if(!confirm(`Ban ${targetUsername}? User ini tidak bisa login lagi.`)) return;
+  try{
+    const r=await fetch('/admin/ban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ ${targetUsername} dibanned!`:'✖ '+d.message,!d.success);
+    if(d.success) await loadAdminUsers();
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
+
+async function adminUnban(targetUsername){
+  try{
+    const r=await fetch('/admin/unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ ${targetUsername} di-unban!`:'✖ '+d.message,!d.success);
+    if(d.success) await loadAdminUsers();
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
+
+async function adminDeleteChannel(channelId){
+  if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
+  try{
+    const r=await fetch(`/admin/channel/${channelId}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ Channel ${channelId} dihapus!`:'✖ '+d.message,!d.success);
+    if(d.success){await loadAdminChannels();await loadChannels();}
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
+
+function setAdminMsg(msg,isErr){
+  const el=document.getElementById('adminMsg');
+  el.textContent=msg;
+  el.className='admin-msg'+(isErr?' err':'');
+}
+
+// Handle kicked/banned from server
+socket.on('kicked',({channel,reason})=>{
+  if(currentChannel===channel){
+    currentChannel=null;
+    document.getElementById('pttDisabled').style.display='flex';
+    document.getElementById('pttBtn').style.display='none';
+    document.getElementById('ledGreen').classList.remove('active');
+    document.getElementById('chLabel').textContent='NO CHANNEL';
+    document.getElementById('statusBadge').textContent='STANDBY';
+    renderChannels();
+    alert('⚠ '+reason);
+  }
+});
+
+socket.on('banned',({reason})=>{
+  doLogout();
+  setTimeout(()=>setMsg('loginMsg','✖ '+reason,'error'),100);
+});
+
+socket.on('channel_removed',({channelId})=>{
+  channels=channels.filter(c=>c.id!==channelId);
+  if(currentChannel===channelId){
+    currentChannel=null;
+    document.getElementById('pttDisabled').style.display='flex';
+    document.getElementById('pttBtn').style.display='none';
+    document.getElementById('ledGreen').classList.remove('active');
+    document.getElementById('chLabel').textContent='NO CHANNEL';
+    document.getElementById('statusBadge').textContent='STANDBY';
+  }
+  renderChannels();
 });
 
 document.addEventListener('keydown',(e)=>{
