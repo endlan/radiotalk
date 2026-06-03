@@ -425,22 +425,14 @@ async function doLogin(){
   try{
     const r=await fetch('https://radiotalk-production-8d66.up.railway.app/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const d=await r.json();
-    if(d.success){currentUser=d.username;isAdmin=d.isAdmin||false;showMainApp();}
+    if(d.success){
+      currentUser=d.username;isAdmin=d.isAdmin||false;
+      localStorage.setItem('savedUser', d.username);
+      localStorage.setItem('savedAdmin', d.isAdmin||false);
+      showMainApp();
+    }
     else setMsg('loginMsg','✖ '+d.message,'error');
   }catch{setMsg('loginMsg','✖ SERVER ERROR','error');}
-}
-async function doRegister(){
-  const u=document.getElementById('regUsername').value.trim();
-  const p=document.getElementById('regPassword').value;
-  if(!u||!p){setMsg('registerMsg','⚠ ISI SEMUA FIELD','error');return;}
-  if(p.length<6){setMsg('registerMsg','⚠ PASSWORD MIN 6 KARAKTER','error');return;}
-  setMsg('registerMsg','... REGISTERING ...','');
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-    const d=await r.json();
-    if(d.success){setMsg('registerMsg','✔ BERHASIL! SILAKAN LOGIN','success');setTimeout(()=>switchTab('login'),1500);}
-    else setMsg('registerMsg','✖ '+d.message,'error');
-  }catch{setMsg('registerMsg','✖ SERVER ERROR','error');}
 }
 function showMainApp(){
   document.getElementById('authScreen').style.display='none';
@@ -453,6 +445,8 @@ function showMainApp(){
   loadChannels();
 }
 function doLogout(){
+  localStorage.removeItem('savedUser');
+  localStorage.removeItem('savedAdmin');
   socket.emit('leave_channel');
   currentUser=null; currentChannel=null; isAdmin=false;
   document.getElementById('adminPanelBtn').classList.remove('show');
@@ -582,6 +576,16 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ===== SOCKET =====
 const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
+
+window.addEventListener('load', ()=>{
+  const savedUser = localStorage.getItem('savedUser');
+  const savedAdmin = localStorage.getItem('savedAdmin');
+  if(savedUser){
+    currentUser = savedUser;
+    isAdmin = savedAdmin === 'true';
+    showMainApp();
+  }
+});
 
 socket.on('channel_members',(members)=>{
   const panel=document.getElementById('memberPanel');
