@@ -1,12 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-app.use(cors());
 const http = require('http');
 const { Server } = require('socket.io');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
 
-// Baca dari env variable (Railway) atau file lokal (Termux)
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -21,9 +19,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
-
 // Memory: track who is in which channel
 // { channelName: { socketId: username } }
 const channelMembers = {};
