@@ -48,6 +48,7 @@ app.post('/login', async (req, res) => {
     const user = doc.data();
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.json({ success: false, message: 'Password salah!' });
+    if (user.banned) return res.json({ success: false, message: 'Akun kamu telah dibanned!' });
     await userRef.update({ lastActive: new Date() });
     res.json({ success: true, username, isAdmin: user.isAdmin });
   } catch (err) { res.json({ success: false, message: err.message }); }
@@ -96,6 +97,125 @@ app.post('/channels/verify', async (req, res) => {
     if (!data.password) return res.json({ success: true });
     const match = await bcrypt.compare(password, data.password);
     res.json({ success: match, message: match ? '' : 'Sandi salah!' });
+  } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// ===== ADMIN API =====
+
+// Helper: cek apakah user adalah admin
+async function checkAdmin(username) {
+  const doc = await db.collection('users').doc(username).get();
+  if (!doc.exists) return false;
+  return doc.data().isAdmin === true;
+}
+
+// Kick user dari channel
+app.post('/admin/kick', async (req, res) => {
+  const { adminUsername, targetUsername, channelId } = req.body;
+  try {
+    if (!(await checkAdmin(adminUsername))) {
+      return res.json({ success: false, message: 'Bukan admin!' });
+    }
+    // Cari socket ID dari targetUsername di channel
+    if (channelMembers[channelId]) {
+      const targetSocketId = Object.keys(channelMembers[channelId]).find(
+        sid => channelMembers[channelId][sid] === targetUsername
+      );
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('kicked', { channel: channelId, reason: 'Dikeluarkan oleh admin' });
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+          targetSocket.leave(channelId);
+          delete channelMembers[channelId][targetSocketId];
+          const members = Object.values(channelMembers[channelId]);
+          io.to(channelId).emit('channel_members', members);
+          io.emit('channel_update', { channelId, memberCount: members.length, members });
+        }
+        return res.json({ success: true, message: `${targetUsername} telah dikick dari ${channelId}` });
+      }
+    }
+    res.json({ success: false, message: 'User tidak ditemukan di channel!' });
+  } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// Ban user dari aplikasi
+app.post('/admin/ban', async (req, res) => {
+  const { adminUsername, targetUsername } = req.body;
+  try {
+    if (!(await checkAdmin(adminUsername))) {
+      return res.json({ success: false, message: 'Bukan admin!' });
+    }
+    const userRef = db.collection('users').doc(targetUsername);
+    const doc = await userRef.get();
+    if (!doc.exists) return res.json({ success: false, message: 'User tidak ditemukan!' });
+    if (doc.data().isAdmin) return res.json({ success: false, message: 'Tidak bisa ban admin!' });
+    await userRef.update({ banned: true });
+    // Kick dari semua channel yang sedang diikuti
+    for (const [chId, members] of Object.entries(channelMembers)) {
+      const targetSocketId = Object.keys(members).find(sid => members[sid] === targetUsername);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('banned', { reason: 'Kamu telah dibanned oleh admin' });
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+          targetSocket.leave(chId);
+          delete channelMembers[chId][targetSocketId];
+          const updatedMembers = Object.values(channelMembers[chId]);
+          io.to(chId).emit('channel_members', updatedMembers);
+          io.emit('channel_update', { channelId: chId, memberCount: updatedMembers.length, members: updatedMembers });
+        }
+      }
+    }
+    res.json({ success: true, message: `${targetUsername} telah dibanned` });
+  } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// Unban user
+app.post('/admin/unban', async (req, res) => {
+  const { adminUsername, targetUsername } = req.body;
+  try {
+    if (!(await checkAdmin(adminUsername))) {
+      return res.json({ success: false, message: 'Bukan admin!' });
+    }
+    const userRef = db.collection('users').doc(targetUsername);
+    const doc = await userRef.get();
+    if (!doc.exists) return res.json({ success: false, message: 'User tidak ditemukan!' });
+    await userRef.update({ banned: false });
+    res.json({ success: true, message: `${targetUsername} telah di-unban` });
+  } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// Hapus channel
+app.delete('/admin/channel/:channelId', async (req, res) => {
+  const { adminUsername } = req.body;
+  const { channelId } = req.params;
+  try {
+    if (!(await checkAdmin(adminUsername))) {
+      return res.json({ success: false, message: 'Bukan admin!' });
+    }
+    await db.collection('channels').doc(channelId).delete();
+    // Kick semua user dari channel
+    if (channelMembers[channelId]) {
+      io.to(channelId).emit('channel_deleted', { channelId });
+      delete channelMembers[channelId];
+    }
+    io.emit('channel_removed', { channelId });
+    res.json({ success: true, message: `Channel ${channelId} telah dihapus` });
+  } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// Get all users (admin only)
+app.get('/admin/users', async (req, res) => {
+  const { adminUsername } = req.query;
+  try {
+    if (!(await checkAdmin(adminUsername))) {
+      return res.json({ success: false, message: 'Bukan admin!' });
+    }
+    const snap = await db.collection('users').get();
+    const users = snap.docs.map(doc => {
+      const d = doc.data();
+      return { username: d.username, isAdmin: d.isAdmin || false, banned: d.banned || false, createdAt: d.createdAt };
+    });
+    res.json({ success: true, users });
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
