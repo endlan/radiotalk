@@ -264,6 +264,17 @@ socket.on('rejoin_channel', ({ channel, username }) => {
   io.to(channel).emit('channel_members', members);
   io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
 });
+  socket.on('emergency_start', (username) => {
+  io.emit('emergency_alert', {username});
+});
+
+socket.on('emergency_data', (data) => {
+  io.emit('emergency_voice', data.audio);
+});
+
+socket.on('emergency_end', (username) => {
+  io.emit('emergency_stop', {username});
+});
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
 
 socket.on('voice_data', (data) => {
