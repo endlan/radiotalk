@@ -591,16 +591,16 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
 
-let isFirstConnect = true; // ← TAMBAH BARIS INI
+let isFirstConnect = true;
 
-socket.on('connect', () => { // ← GANTI yang lama dengan ini
+socket.on('connect', () => {
   if(isFirstConnect) {
     isFirstConnect = false;
     return;
   }
   if(currentUser) socket.emit('set_username', currentUser);
   if(currentChannel) {
-    socket.emit('join_channel', {channel: currentChannel, username: currentUser});
+    socket.emit('rejoin_channel', {channel: currentChannel, username: currentUser}); // ← pakai rejoin
   }
 });
   
