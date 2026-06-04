@@ -256,13 +256,17 @@ function leaveCurrentChannel() {
 
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
 
-  socket.on('voice_data', (data) => {
-    socket.to(data.channel).emit('user_talking', currentUsername);
+socket.on('voice_data', (data) => {
+    if (!isTalking) {
+      isTalking = true;
+      socket.to(data.channel).emit('user_talking', currentUsername);
+    }
     socket.to(data.channel).emit('voice_data', data.audio);
   });
-
-  socket.on('voice_end', (channel) => { socket.to(channel).emit('user_stop_talking'); });
-
+  socket.on('voice_end', (channel) => {
+    isTalking = false;
+    socket.to(channel).emit('user_stop_talking');
+  });
   socket.on('disconnect', () => {
     console.log('User keluar:', socket.id);
     leaveCurrentChannel();
