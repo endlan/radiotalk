@@ -539,6 +539,7 @@ async function doVerifyPass(){
 
 function joinChannel(chId){
   currentChannel=chId;
+  localStorage.setItem('savedChannel', chId);
   socket.emit('join_channel',{channel:chId,username:currentUser});
   document.getElementById('freqDisplay').textContent=randomFreq()+' MHz';
   document.getElementById('chLabel').textContent='CH: '+chId.toUpperCase();
@@ -599,10 +600,12 @@ socket.on('connect', () => {
 window.addEventListener('load', ()=>{
   const savedUser = localStorage.getItem('savedUser');
   const savedAdmin = localStorage.getItem('savedAdmin');
+  const savedChannel = localStorage.getItem('savedChannel'); // ← TAMBAH INI
   if(savedUser){
     currentUser = savedUser;
     isAdmin = savedAdmin === 'true';
     showMainApp();
+    if(savedChannel) joinChannel(savedChannel); // ← TAMBAH INI
   }
 });
 
