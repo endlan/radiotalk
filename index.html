@@ -590,7 +590,14 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ===== SOCKET =====
 const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
-socket.on('connect', () => {
+
+let isFirstConnect = true; // ← TAMBAH BARIS INI
+
+socket.on('connect', () => { // ← GANTI yang lama dengan ini
+  if(isFirstConnect) {
+    isFirstConnect = false;
+    return;
+  }
   if(currentUser) socket.emit('set_username', currentUser);
   if(currentChannel) {
     socket.emit('join_channel', {channel: currentChannel, username: currentUser});
