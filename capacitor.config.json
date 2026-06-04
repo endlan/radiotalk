@@ -1,7 +1,11 @@
 {
   "appId": "com.radiotalk.app",
-  "appName": "Walkie-Talkie",
+  "appName": "RadioTalk",
   "webDir": "www",
+  "server": {
+    "url": "https://radiotalk-production-8d66.up.railway.app",
+    "cleartext": true
+  },
   "android": {
     "allowMixedContent": true,
     "backgroundColor": "#000000"
