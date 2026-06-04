@@ -589,7 +589,13 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ===== SOCKET =====
 const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
-
+socket.on('connect', () => {
+  if(currentUser) socket.emit('set_username', currentUser);
+  if(currentChannel) {
+    socket.emit('join_channel', {channel: currentChannel, username: currentUser});
+  }
+});
+  
 window.addEventListener('load', ()=>{
   const savedUser = localStorage.getItem('savedUser');
   const savedAdmin = localStorage.getItem('savedAdmin');
