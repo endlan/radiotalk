@@ -494,7 +494,7 @@ function showMainApp(){
   document.getElementById('freqDisplay').textContent=randomFreq()+' MHz';
   if(isAdmin) document.getElementById('adminPanelBtn').classList.add('show');
   socket.emit('set_username',currentUser);
-  getFCMToken(); // ← TAMBAH INI
+  setupPushNotifications(); // ← TAMBAH INI
   loadChannels();
 }
 function doLogout(){
