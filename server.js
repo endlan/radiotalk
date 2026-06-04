@@ -267,8 +267,21 @@ socket.on('rejoin_channel', ({ channel, username }) => {
   io.to(channel).emit('channel_members', members);
   io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
 });
-  socket.on('emergency_start', (username) => {
+  socket.on('emergency_start', async (username) => {
   io.emit('emergency_alert', {username});
+  const onlineSockets = await io.fetchSockets();
+  const onlineUsers = onlineSockets.map(s => s.data?.username || '');
+  for(const [user, token] of Object.entries(fcmTokens)) {
+    if(!onlineUsers.includes(user) && user !== username) {
+      await admin.messaging().send({
+        token,
+        notification: {
+          title: '🚨 EMERGENCY!',
+          body: username.toUpperCase() + ' membutuhkan bantuan!'
+        }
+      }).catch(err => console.log('FCM error:', err));
+    }
+  }
 });
 
 socket.on('emergency_data', (data) => {
