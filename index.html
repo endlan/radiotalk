@@ -655,14 +655,16 @@ async function startTalk(e){
     mediaRecorder=new MediaRecorder(stream);
     audioChunks=[];
     mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
-    mediaRecorder.onstop=()=>{
-      const blob=new Blob(audioChunks,{type:'audio/webm'});
-      const reader=new FileReader();
-      reader.onload=()=>socket.emit('voice_data',{channel:currentChannel,audio:reader.result});
-      reader.readAsDataURL(blob);
-      stream.getTracks().forEach(t=>t.stop());
-      socket.emit('voice_end',currentChannel);
-    };
+mediaRecorder.onstop=()=>{
+  const blob=new Blob(audioChunks,{type:'audio/webm'});
+  const reader=new FileReader();
+  reader.onload=()=>{
+    socket.emit('voice_data',{channel:currentChannel,audio:reader.result});
+    socket.emit('voice_end',currentChannel);
+  };
+  reader.readAsDataURL(blob);
+  stream.getTracks().forEach(t=>t.stop());
+};
     mediaRecorder.start();
     document.getElementById('pttBtn').classList.add('talking');
     document.getElementById('txIndicator').classList.add('active');
