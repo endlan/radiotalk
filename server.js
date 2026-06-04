@@ -227,14 +227,14 @@ io.on('connection', (socket) => {
 
   socket.on('set_username', (username) => { currentUsername = username; });
 
-  function leaveCurrentChannel() {
+function leaveCurrentChannel() {
     if (currentChannel) {
+      socket.to(currentChannel).emit('user_stop_talking'); // ← TAMBAH INI
       socket.leave(currentChannel);
       if (channelMembers[currentChannel]) {
         delete channelMembers[currentChannel][socket.id];
         const members = Object.values(channelMembers[currentChannel]);
         io.to(currentChannel).emit('channel_members', members);
-        // Broadcast updated channel list
         io.emit('channel_update', { channelId: currentChannel, memberCount: members.length, members });
       }
       currentChannel = null;
