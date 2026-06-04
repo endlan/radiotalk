@@ -218,6 +218,40 @@
     .btn-del-ch:hover{background:rgba(255,34,0,0.2)}
     .admin-msg{font-size:9px;text-align:center;margin-top:6px;min-height:14px;letter-spacing:1px;color:var(--green)}
     .admin-msg.err{color:var(--red)}
+    .emergency-section {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+.emergency-btn {
+  background: linear-gradient(145deg, #ff6600, #cc3300);
+  border: 3px solid #ff9900;
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  padding: 10px 30px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255,100,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.emergency-btn.active {
+  background: linear-gradient(145deg, #ff0000, #990000);
+  border-color: #ff0000;
+  box-shadow: 0 0 25px rgba(255,0,0,0.8);
+  animation: emergency-pulse 0.5s infinite alternate;
+}
+@keyframes emergency-pulse {
+  from { box-shadow: 0 0 15px rgba(255,0,0,0.6); }
+  to { box-shadow: 0 0 35px rgba(255,0,0,1); }
+}
+.emergency-icon { font-size: 20px; }
+.emergency-label { font-size: 10px; letter-spacing: 3px; }
   </style>
 </head>
 <body>
@@ -381,6 +415,21 @@
         <div class="tx-indicator" id="txIndicator">◉ TX</div>
       </div>
 
+      <div class="tx-indicator" id="txIndicator">◉ TX</div>
+      </div>
+
+      <!-- EMERGENCY BUTTON -->
+      <div class="emergency-section">
+        <button class="emergency-btn" id="emergencyBtn"
+          ontouchstart="startEmergency(event)" ontouchend="stopEmergency(event)"
+          onmousedown="startEmergency(event)" onmouseup="stopEmergency(event)">
+          <div class="emergency-icon">⚠️</div>
+          <div class="emergency-label">EMERGENCY</div>
+        </button>
+      </div>
+
+      <div class="bottom-controls">
+      
       <div class="bottom-controls">
         <div class="knob-wrap"><div class="knob"></div><div class="knob-label">VOL</div></div>
         <div class="led-group">
