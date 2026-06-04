@@ -25,7 +25,7 @@ app.use(express.json());
 // Memory: track who is in which channel
 // { channelName: { socketId: username } }
 const channelMembers = {};
-
+const fcmTokens = {};
 // ===== AUTH =====
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -227,7 +227,10 @@ io.on('connection', (socket) => {
   let isTalking = false;
 
   socket.on('set_username', (username) => { currentUsername = username; });
-
+socket.on('register_fcm_token', ({username, token}) => {
+  fcmTokens[username] = token;
+  console.log('FCM token registered:', username);
+});
 function leaveCurrentChannel() {
     if (currentChannel) {
       socket.to(currentChannel).emit('user_stop_talking'); // ← TAMBAH INI
