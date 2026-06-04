@@ -254,7 +254,16 @@ function leaveCurrentChannel() {
     io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
     console.log(`${currentUsername} join: ${channel}`);
   });
-
+socket.on('rejoin_channel', ({ channel, username }) => {
+  currentChannel = channel;
+  currentUsername = username || currentUsername;
+  socket.join(channel);
+  if (!channelMembers[channel]) channelMembers[channel] = {};
+  channelMembers[channel][socket.id] = currentUsername;
+  const members = Object.values(channelMembers[channel]);
+  io.to(channel).emit('channel_members', members);
+  io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
+});
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
 
 socket.on('voice_data', (data) => {
