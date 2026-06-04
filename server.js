@@ -224,6 +224,7 @@ io.on('connection', (socket) => {
   console.log('User terhubung:', socket.id);
   let currentChannel = null;
   let currentUsername = null;
+  let isTalking = false;
 
   socket.on('set_username', (username) => { currentUsername = username; });
 
