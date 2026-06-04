@@ -1,1 +1,14 @@
-{"appId":"com.radiotalk.app","appName":"Walkie-Talkie","webDir":"www"} 
+{
+  "appId": "com.radiotalk.app",
+  "appName": "Walkie-Talkie",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#000000"
+  },
+  "plugins": {
+    "App": {
+      "backgroundMode": true
+    }
+  }
+}

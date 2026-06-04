@@ -623,7 +623,7 @@ socket.on('user_talking',(username)=>{
       if(!item.querySelector('.badge-tx')){const b=document.createElement('span');b.className='m-badge badge-tx';b.textContent='TX';item.appendChild(b);}
     }
   });
-  document.getElementById('statusBadge').textContent='RECEIVE';
+  document.getElementById('statusBadge').textContent='▶ '+username.toUpperCase();
 });
 
 socket.on('user_stop_talking',()=>{
