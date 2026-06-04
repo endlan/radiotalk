@@ -630,6 +630,12 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ===== SOCKET =====
 const socket=io('https://radiotalk-production-8d66.up.railway.app');
 let mediaRecorder,audioChunks=[];
+  // Register Service Worker
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(reg => console.log('SW registered:', reg))
+    .catch(err => console.log('SW error:', err));
+}
 // Firebase setup
 const firebaseConfig = {
   apiKey: "AIzaSyAHjV4ouHce9feeOGS-7XhpxUy8HLE6yAA",
