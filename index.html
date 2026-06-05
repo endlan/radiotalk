@@ -963,12 +963,11 @@ socket.on('emergency_alert',({username})=>{
   document.body.style.border='4px solid red';
   setTimeout(()=>document.body.style.border='',5000);
   const notif=document.createElement('div');
-  notif.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#cc0000;color:#fff;padding:12px 20px;border-radius:8px;font-weight:bold;z-ind
+  notif.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#cc0000;color:#fff;padding:12px 20px;border-radius:8px;font-weight:bold;z-index:9999';
   notif.textContent='🚨 EMERGENCY dari '+username.toUpperCase()+'!';
   document.body.appendChild(notif);
   setTimeout(()=>notif.remove(),5000);
 });
-
 socket.on('emergency_limit', (pesan) => {
   alert(pesan);
 });
