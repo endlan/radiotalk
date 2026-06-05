@@ -233,7 +233,8 @@ io.on('connection', (socket) => {
 socket.on('register_fcm_token', ({username, token}) => {
   fcmTokens[username] = token;
   console.log('FCM token registered:', username);
-  socket.on('debug', (msg) => {
+});
+socket.on('debug', (msg) => {
   console.log('DEBUG:', msg);
 });
 function leaveCurrentChannel() {
