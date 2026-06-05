@@ -4,7 +4,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
-
+const emergencyCount = {};
+const schedule = require('node-schedule');
+// Reset hitungan setiap hari jam 00:00
+schedule.scheduleJob('0 0 * * *', () => {
+  Object.keys(emergencyCount).forEach(key => delete emergencyCount[key]);
+  console.log('Emergency count reset');
+});
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
