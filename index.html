@@ -652,21 +652,14 @@ async function setupPushNotifications() {
   socket.emit('debug', 'setup push called, capacitor: ' + !!window.Capacitor);
   try {
     if(window.Capacitor) {
-      socket.emit('debug', 'running in capacitor');
       const FirebaseMessaging = window.Capacitor.Plugins.FirebaseMessaging;
       if(!FirebaseMessaging) {
         socket.emit('debug', 'FirebaseMessaging plugin not found');
         return;
       }
-      const { receive } = await FirebaseMessaging.requestPermissions();
-      socket.emit('debug', 'permission: ' + receive);
-      if(receive === 'granted') {
-        const { token } = await FirebaseMessaging.getToken();
-        socket.emit('debug', 'token: ' + token);
-        if(token && currentUser) {
-          socket.emit('register_fcm_token', {username: currentUser, token});
-        }
-      }
+      await FirebaseMessaging.requestPermissions();
+      await FirebaseMessaging.subscribeToTopic({topic: 'emergency'});
+      socket.emit('debug', 'subscribed to emergency topic');
     }
   } catch(err) {
     socket.emit('debug', 'error: ' + err.message);
