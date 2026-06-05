@@ -649,24 +649,20 @@ if('serviceWorker' in navigator) {
 }
 // Firebase / Push Notification setup
 async function setupPushNotifications() {
+  console.log('Setup push called, Capacitor:', !!window.Capacitor);
   try {
     if(window.Capacitor) {
+      console.log('Running in Capacitor');
       const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
       const { receive } = await FirebaseMessaging.requestPermissions();
-      console.log('Permission status:', receive);
+      console.log('Permission:', receive);
       if(receive === 'granted') {
         const { token } = await FirebaseMessaging.getToken();
+        console.log('Token:', token);
         if(token && currentUser) {
           socket.emit('register_fcm_token', {username: currentUser, token});
-          console.log('FCM Token:', token);
+          console.log('FCM token registered:', currentUser);
         }
-      }
-    } else {
-      const token = await messaging.getToken({
-        vapidKey: 'BFvn4MwhFPvrDaMrLQ872ts7mUYUgFhoSLMKhbpao3QhNavTN8pabN3t_i1u55XKGc8Ke_SOtkIyRwwxDFS27Oo'
-      });
-      if(token && currentUser) {
-        socket.emit('register_fcm_token', {username: currentUser, token});
       }
     }
   } catch(err) {
