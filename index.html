@@ -653,7 +653,11 @@ async function setupPushNotifications() {
   try {
     if(window.Capacitor) {
       socket.emit('debug', 'running in capacitor');
-      const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
+      const FirebaseMessaging = window.Capacitor.Plugins.FirebaseMessaging;
+      if(!FirebaseMessaging) {
+        socket.emit('debug', 'FirebaseMessaging plugin not found');
+        return;
+      }
       const { receive } = await FirebaseMessaging.requestPermissions();
       socket.emit('debug', 'permission: ' + receive);
       if(receive === 'granted') {
