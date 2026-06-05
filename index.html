@@ -276,7 +276,18 @@
         <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
       </div>
     </div>
-
+<div class="admin-section">
+  <div class="admin-section-title">▷ BROADCAST</div>
+  <div class="form-field">
+    <label class="form-label">▷ CHANNEL (kosong = semua)</label>
+    <input class="form-input" id="announceChannel" placeholder="nama channel / kosongkan" />
+  </div>
+  <div class="form-field">
+    <label class="form-label">▷ PESAN</label>
+    <input class="form-input" id="announceMsg" placeholder="tulis pengumuman..." />
+  </div>
+  <button class="btn-ok" style="width:100%" onclick="doAnnounce()">📢 KIRIM BROADCAST</button>
+</div>
     <div class="admin-msg" id="adminMsg"></div>
     <button class="btn-cancel" style="width:100%;margin-top:4px" onclick="closeModal('modalAdmin')">TUTUP</button>
   </div>
