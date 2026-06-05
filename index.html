@@ -650,21 +650,26 @@ if('serviceWorker' in navigator) {
 // Firebase / Push Notification setup
 async function setupPushNotifications() {
   try {
-if(window.Capacitor && window.Capacitor.isNativePlatform()) {
-  const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
-  
-  // Request permission dulu
-  const { receive } = await FirebaseMessaging.requestPermissions();
-  console.log('Permission status:', receive);
-  
-  if(receive === 'granted') {
-    const { token } = await FirebaseMessaging.getToken();
-    if(token && currentUser) {
-      socket.emit('register_fcm_token', {username: currentUser, token});
-      console.log('FCM Token:', token);
+    if(window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
+      const { receive } = await FirebaseMessaging.requestPermissions();
+      console.log('Permission status:', receive);
+      if(receive === 'granted') {
+        const { token } = await FirebaseMessaging.getToken();
+        if(token && currentUser) {
+          socket.emit('register_fcm_token', {username: currentUser, token});
+          console.log('FCM Token:', token);
+        }
+      }
+    } else {
+      const token = await messaging.getToken({
+        vapidKey: 'BFvn4MwhFPvrDaMrLQ872ts7mUYUgFhoSLMKhbpao3QhNavTN8pabN3t_i1u55XKGc8Ke_SOtkIyRwwxDFS27Oo'
+      });
+      if(token && currentUser) {
+        socket.emit('register_fcm_token', {username: currentUser, token});
+      }
     }
-  }
-} catch(err) {
+  } catch(err) {
     console.log('Push notification error:', err);
   }
 }
