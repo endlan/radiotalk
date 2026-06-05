@@ -657,6 +657,7 @@ async function setupPushNotifications() {
         socket.emit('debug', 'FirebaseMessaging plugin not found');
         return;
       }
+      await new Promise(resolve => setTimeout(resolve, 2000));
       await FirebaseMessaging.requestPermissions();
       await FirebaseMessaging.subscribeToTopic({topic: 'emergency'});
       socket.emit('debug', 'subscribed to emergency topic');
