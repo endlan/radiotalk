@@ -772,7 +772,7 @@ socket.on('user_talking', (username) => {
   si.textContent = '🎙 ' + username.toUpperCase() + ' SEDANG BICARA...';
   si.style.display = 'block';
 });
-
+socket.on('user_stop_talking', () => {
   talkingUser=null;
   document.querySelectorAll('.member-dot').forEach(d=>d.classList.remove('talking'));
   document.querySelectorAll('.member-name').forEach(n=>n.classList.remove('talking'));
