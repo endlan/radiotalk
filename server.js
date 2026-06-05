@@ -277,12 +277,19 @@ socket.on('rejoin_channel', ({ channel, username }) => {
   io.emit('emergency_alert', {username});
   // Kirim FCM notification ke topic emergency
   await admin.messaging().send({
-    topic: 'emergency',
+  topic: 'emergency',
+  notification: {
+    title: '🚨 EMERGENCY!',
+    body: username.toUpperCase() + ' membutuhkan bantuan!'
+  },
+  android: {
+    priority: 'high',
     notification: {
-      title: '🚨 EMERGENCY!',
-      body: username.toUpperCase() + ' membutuhkan bantuan!'
+      sound: 'default',
+      channelId: 'RadioTalkChannel'
     }
-  }).catch(err => console.log('FCM error:', err));
+  }
+}).catch(err => console.log('FCM error:', err));
 });
 
 socket.on('emergency_data', (data) => {
