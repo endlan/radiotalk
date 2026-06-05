@@ -893,6 +893,7 @@ async function loadAdminUsers(){
         ${!u.isAdmin&&!u.banned&&currentChannel?`<button class="admin-action-btn btn-kick" onclick="adminKick('${u.username}')">KICK</button>`:''}
         ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn btn-ban" onclick="adminBan('${u.username}')">BAN</button>`:''}
         ${u.banned?`<button class="admin-action-btn btn-unban" onclick="adminUnban('${u.username}')">UNBAN</button>`:''}
+        ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn" style="background:rgba(255,204,0,0.1);color:#ffcc00;border:1px solid rgba(255,204,0,0.3)" onclick="${u.muted?'adminUnmute':'adminMute'}('${u.username}')">${u.muted?'UNMUTE':'MUTE'}</button>`:''}
       `;
       list.appendChild(div);
     });
@@ -948,6 +949,23 @@ async function adminUnban(targetUsername){
     setAdminMsg(d.success?`✔ ${targetUsername} di-unban!`:'✖ '+d.message,!d.success);
     if(d.success) await loadAdminUsers();
   }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  async function adminMute(targetUsername){
+  try{
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/mute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ ${targetUsername} dimute!`:'✖ '+d.message,!d.success);
+    if(d.success) await loadAdminUsers();
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
+
+async function adminUnmute(targetUsername){
+  try{
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/unmute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+    const d=await r.json();
+    setAdminMsg(d.success?`✔ ${targetUsername} di-unmute!`:'✖ '+d.message,!d.success);
+    if(d.success) await loadAdminUsers();
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
 }
 
 async function adminDeleteChannel(channelId){
