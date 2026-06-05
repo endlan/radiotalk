@@ -978,7 +978,17 @@ async function adminUnmute(targetUsername){
   }catch{setAdminMsg('✖ SERVER ERROR',true);}
 }
 }
-
+async function doAnnounce(){
+  const msg=document.getElementById('announceMsg').value.trim();
+  const ch=document.getElementById('announceChannel').value.trim();
+  if(!msg){setAdminMsg('⚠ Pesan tidak boleh kosong!',true);return;}
+  try{
+    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/announce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,channelId:ch||null,message:msg})});
+    const d=await r.json();
+    setAdminMsg(d.success?'✔ Broadcast terkirim!':'✖ '+d.message,!d.success);
+    if(d.success) document.getElementById('announceMsg').value='';
+  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+}
 async function adminDeleteChannel(channelId){
   if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
   try{
