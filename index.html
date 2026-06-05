@@ -639,23 +639,21 @@ if('serviceWorker' in navigator) {
 // Firebase / Push Notification setup
 async function setupPushNotifications() {
   try {
-    const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
-    
-    await FirebaseMessaging.requestPermissions();
-    
-    const { token } = await FirebaseMessaging.getToken();
-    if(token && currentUser) {
-      socket.emit('register_fcm_token', {username: currentUser, token});
-      console.log('FCM Token:', token);
+    if(window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
+      await FirebaseMessaging.requestPermissions();
+      const { token } = await FirebaseMessaging.getToken();
+      if(token && currentUser) {
+        socket.emit('register_fcm_token', {username: currentUser, token});
+      }
+    } else {
+      const token = await messaging.getToken({
+        vapidKey: 'BFvn4MwhFPvrDaMrLQ872ts7mUYUgFhoSLMKhbpao3QhNavTN8pabN3t_i1u55XKGc8Ke_SOtkIyRwwxDFS27Oo'
+      });
+      if(token && currentUser) {
+        socket.emit('register_fcm_token', {username: currentUser, token});
+      }
     }
-
-    FirebaseMessaging.addListener('notificationReceived', notification => {
-      console.log('Notification received:', notification);
-    });
-
-    FirebaseMessaging.addListener('notificationActionPerformed', notification => {
-      console.log('Notification action:', notification);
-    });
   } catch(err) {
     console.log('Push notification error:', err);
   }
