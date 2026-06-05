@@ -280,22 +280,29 @@ socket.on('rejoin_channel', ({ channel, username }) => {
   io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
 });
   socket.on('emergency_start', async (username) => {
-  io.emit('emergency_alert', {username});
-  // Kirim FCM notification ke topic emergency
-  await admin.messaging().send({
-  topic: 'emergency',
-  notification: {
-    title: '🚨 EMERGENCY!',
-    body: username.toUpperCase() + ' membutuhkan bantuan!'
-  },
-  android: {
-    priority: 'high',
-    notification: {
-      sound: 'default',
-      channelId: 'RadioTalkChannel'
+  if(username !== 'Endri') {
+    if((emergencyCount[username] || 0) >= 2) {
+      socket.emit('emergency_limit', 'Batas emergency harian sudah tercapai');
+      return;
     }
+    emergencyCount[username] = (emergencyCount[username] || 0) + 1;
   }
-}).catch(err => console.log('FCM error:', err));
+
+  io.emit('emergency_alert', {username});
+  await admin.messaging().send({
+    topic: 'emergency',
+    notification: {
+      title: '🚨 EMERGENCY!',
+      body: username.toUpperCase() + ' membutuhkan bantuan!'
+    },
+    android: {
+      priority: 'high',
+      notification: {
+        sound: 'default',
+        channelId: 'RadioTalkChannel'
+      }
+    }
+  }).catch(err => console.log('FCM error:', err));
 });
 
 socket.on('emergency_data', (data) => {
