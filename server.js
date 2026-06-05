@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const emergencyCount = {};
 const schedule = require('node-schedule');
 // Reset hitungan setiap hari jam 00:00
-schedule.scheduleJob('0 0 * * *', () => {
+schedule.scheduleJob('0 17 * * *', () => {
   Object.keys(emergencyCount).forEach(key => delete emergencyCount[key]);
   console.log('Emergency count reset');
 });
