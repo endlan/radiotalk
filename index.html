@@ -650,7 +650,7 @@ if('serviceWorker' in navigator) {
 // Firebase / Push Notification setup
 async function setupPushNotifications() {
   try {
-    if(window.Capacitor && window.Capacitor.isNativePlatform()) {
+    if(window.Capacitor) {
       const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
       const { receive } = await FirebaseMessaging.requestPermissions();
       console.log('Permission status:', receive);
