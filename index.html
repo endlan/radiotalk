@@ -657,10 +657,24 @@ async function setupPushNotifications() {
         socket.emit('debug', 'FirebaseMessaging plugin not found');
         return;
       }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await FirebaseMessaging.requestPermissions();
-      await FirebaseMessaging.subscribeToTopic({topic: 'emergency'});
-      socket.emit('debug', 'subscribed to emergency topic');
+
+      // Tunggu Firebase siap, coba maksimal 5x
+      let ready = false;
+      for(let i = 0; i < 5; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+          await FirebaseMessaging.requestPermissions();
+          ready = true;
+          break;
+        } catch(e) {
+          socket.emit('debug', 'Firebase not ready, retry ' + (i+1));
+        }
+      }
+
+      if(ready) {
+        await FirebaseMessaging.subscribeToTopic({topic: 'emergency'});
+        socket.emit('debug', 'subscribed to emergency topic');
+      }
     }
   } catch(err) {
     socket.emit('debug', 'error: ' + err.message);
