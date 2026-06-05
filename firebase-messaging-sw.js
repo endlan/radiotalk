@@ -1,0 +1,21 @@
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyAHjV4ouHce9feeOGS-7XhpxUy8HLE6yAA",
+  authDomain: "walkietalkie-dc92d.firebaseapp.com",
+  projectId: "walkietalkie-dc92d",
+  storageBucket: "walkietalkie-dc92d.firebasestorage.app",
+  messagingSenderId: "696467898469",
+  appId: "1:696467898469:web:c1a1a6a303b7429a6d868c"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  const { title, body } = payload.notification;
+  self.registration.showNotification(title, {
+    body,
+    icon: '/assets/icon.png'
+  });
+});
