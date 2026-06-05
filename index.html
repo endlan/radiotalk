@@ -252,6 +252,10 @@
 }
 .emergency-icon { font-size: 20px; }
 .emergency-label { font-size: 10px; letter-spacing: 3px; }
+    #speaker-indicator {
+  transition: none !important;
+  animation: none !important;
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
@@ -770,7 +774,8 @@ socket.on('user_talking', (username) => {
   // Update speaker-indicator (BARU)
   const si = document.getElementById('speaker-indicator');
   si.textContent = '🎙 ' + username.toUpperCase() + ' SEDANG BICARA...';
-  si.style.display = 'block';
+si.style.display = 'block';
+si.style.animation = 'none'; // matikan animasi berkedip
 });
 socket.on('user_stop_talking', () => {
   talkingUser=null;
@@ -904,8 +909,8 @@ async function loadAdminUsers(){
         ${!u.isAdmin&&!u.banned&&currentChannel?`<button class="admin-action-btn btn-kick" onclick="adminKick('${u.username}')">KICK</button>`:''}
         ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn btn-ban" onclick="adminBan('${u.username}')">BAN</button>`:''}
         ${u.banned?`<button class="admin-action-btn btn-unban" onclick="adminUnban('${u.username}')">UNBAN</button>`:''}
-        ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn" style="background:rgba(255,204,0,0.1);color:#ffcc00;border:1px solid rgba(255,204,0,0.3)" onclick="${u.muted?'adminUnmute':'adminMute'}('${u.username}')">${u.muted?'UNMUTE':'MUTE'}</button>`:''}
-      `;
+      `${!u.isAdmin&&!u.banned?`<button class="admin-action-btn" style="background:${u.muted?'rgba(0,255,136,0.1)':'rgba(255,204,0,0.1)'};color:${u.muted?'#00ff88':'#ffcc00'};border:1px solid ${u.muted?'rgba(0,255,136,0.3)':'rgba(255,204,0,0.3)'}" onclick="${u.muted?'adminUnmute':'adminMute'}('${u.username}')">${u.muted?'UNMUTE':'MUTE'}</button>`:''}
+        ;
       list.appendChild(div);
     });
     if(list.children.length===0) list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA USER LAIN</div>';
