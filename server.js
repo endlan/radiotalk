@@ -22,6 +22,9 @@ const io = new Server(server);
 app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
+app.get('/firebase-messaging-sw.js', (req, res) => {
+  res.sendFile(__dirname + '/firebase-messaging-sw.js');
+});
 // Memory: track who is in which channel
 // { channelName: { socketId: username } }
 const channelMembers = {};
