@@ -1075,6 +1075,12 @@ socket.on('emergency_alert',({username})=>{
   notif.textContent='🚨 EMERGENCY dari '+username.toUpperCase()+'!';
   document.body.appendChild(notif);
   setTimeout(()=>notif.remove(),5000);
+  // Putar sirine sebelum suara user
+  try {
+    const siren = new Audio('/emergency_alert.mp3');
+    siren.volume = 1.0;
+    siren.play();
+  } catch(e) { console.log('Siren error:', e); }
 });
 socket.on('emergency_limit', (pesan) => {
   alert(pesan);
