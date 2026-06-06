@@ -862,7 +862,8 @@ async function loadAdminUsers(){
       div.className=`admin-user-item${u.banned?' banned':''}`;
       div.innerHTML=`
   <div class="admin-user-name${u.banned?' banned':''}">${u.username.toUpperCase()}</div>
-  ${u.isAdmin?'<span class="admin-badge badge-admin">ADMIN</span>':''}
+${!u.isAdmin?`<span style="font-size:9px;color:#888">EMG: ${emergencyCountClient[u.username]||0}/2</span>`:''}
+${u.isAdmin?'<span class="admin-badge badge-admin">ADMIN</span>':''}
   ${u.banned?'<span class="admin-badge badge-ban">BANNED</span>':''}
   ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn" id="muteBtn-${u.username}" style="background:#555;color:#fff;" onclick="toggleMute('${u.username}',this)">${mutedUsersClient.has(u.username)?'UNMUTE':'MUTE'}</button>`:''}
   ${!u.isAdmin&&!u.banned&&currentChannel?`<button class="admin-action-btn btn-kick" onclick="adminKick('${u.username}')">KICK</button>`:''}
