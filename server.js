@@ -242,6 +242,23 @@ io.on('connection', (socket) => {
     fcmTokens[username] = token;
     console.log('FCM token registered:', username);
   });
+  socket.on('mute_user', (targetUsername) => {
+  if(currentUsername !== 'Endri') return;
+  mutedUsers.add(targetUsername);
+  // Kirim notif ke user yang dimute
+  for(const [sid, socket2] of io.sockets.sockets) {
+    if(channelMembers[currentChannel] && channelMembers[currentChannel][sid] === targetUsername) {
+      socket2.emit('you_muted');
+    }
+  }
+  io.emit('user_muted', targetUsername);
+});
+
+socket.on('unmute_user', (targetUsername) => {
+  if(currentUsername !== 'Endri') return;
+  mutedUsers.delete(targetUsername);
+  io.emit('user_unmuted', targetUsername);
+});
 socket.on('broadcast_send', (pesan) => {
   if(currentUsername !== 'Endri') return;
   broadcastMessage = pesan;
@@ -345,7 +362,11 @@ socket.on('ptt_start', (channel) => {
 });
   socket.on('voice_data', (data) => {
     const now = Date.now();
-
+// Cek apakah user dimute
+if(mutedUsers.has(currentUsername)) {
+  socket.emit('ptt_rejected', { reason: 'muted' });
+  return;
+}
     // Cek cooldown
     if (pttState.cooldownUntil > now) {
       const sisaMs = pttState.cooldownUntil - now;
