@@ -348,7 +348,7 @@ io.on('connection', (socket) => {
       }
       emergencyCount[username] = (emergencyCount[username] || 0) + 1;
     }
-    io.emit('emergency_alert', {username});
+    io.emit('emergency_alert', {username, lat, lng});
     await admin.messaging().send({
       topic: 'emergency',
       notification: {
