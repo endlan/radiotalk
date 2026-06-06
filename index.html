@@ -677,22 +677,20 @@ async function setupPushNotifications() {
 
       // Tunggu Firebase siap, coba maksimal 5x
       let ready = false;
-      for(let i = 0; i < 5; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        try {
-          await FirebaseMessaging.requestPermissions();
-// Request GPS permission
-try{
-  const {Geolocation} = Capacitor.Plugins;
-  await Geolocation.requestPermissions();
-}catch(e){console.log('GPS permission error:',e);}
-ready = true;
-          break;
-        } catch(e) {
-          socket.emit('debug', 'Firebase not ready, retry ' + (i+1));
-        }
-      }
-
+for(let i = 0; i < 5; i++) {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  try {
+    await FirebaseMessaging.requestPermissions();
+    try{
+      const {Geolocation} = Capacitor.Plugins;
+      await Geolocation.requestPermissions();
+    }catch(e){console.log('GPS permission error:',e);}
+    ready = true;
+    break;
+  } catch(e) {
+    socket.emit('debug', 'Firebase not ready, retry ' + (i+1));
+  }
+}
       if(ready) {
         await FirebaseMessaging.subscribeToTopic({topic: 'emergency'});
         socket.emit('debug', 'subscribed to emergency topic');
