@@ -13,6 +13,14 @@
       --gold: #ffcc00; --gold-dim: rgba(255,204,0,0.15);
       --text: #e0e0e0; --text-dim: #888;
     }
+    @keyframes blinkBorder {
+  0%, 100% { border-color: #ff3333; background: #1a0000; }
+  50% { border-color: #ff6666; background: #2a0000; }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       background:#d4c5a9; min-height:100vh; display:flex; align-items:center; justify-content:center;
