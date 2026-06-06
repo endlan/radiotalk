@@ -12,6 +12,7 @@ schedule.scheduleJob('0 17 * * *', () => {
   console.log('Emergency count reset');
 });
 let broadcastMessage = '';
+const mutedUsers = new Set();
 // PTT State
 let pttState = {
   isBusy: false,
