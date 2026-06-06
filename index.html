@@ -782,20 +782,17 @@ async function startTalk(e){
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     mediaRecorder=new MediaRecorder(stream);
     audioChunks=[];
-mediaRecorder.ondataavailable=e=>{
-  if(e.data && e.data.size > 0) {
-    const reader = new FileReader();
-    reader.onload=()=>{
-      socket.emit('voice_data',{channel:currentChannel,audio:reader.result});
-    };
-    reader.readAsDataURL(e.data);
-  }
-};
+mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
 mediaRecorder.onstop=()=>{
-  socket.emit('voice_end',currentChannel);
+  const blob=new Blob(audioChunks,{type:'audio/webm'});
+  const reader=new FileReader();
+  reader.onload=()=>{
+    socket.emit('voice_data',{channel:currentChannel,audio:reader.result});
+    socket.emit('voice_end',currentChannel);
+  };
+  reader.readAsDataURL(blob);
   stream.getTracks().forEach(t=>t.stop());
-};
-    mediaRecorder.start(250);
+};    mediaRecorder.start(250);
     document.getElementById('pttBtn').classList.add('talking');
     document.getElementById('txIndicator').classList.add('active');
     document.getElementById('statusBadge').textContent='▶ '+currentUser.toUpperCase();
