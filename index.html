@@ -1058,7 +1058,14 @@ document.addEventListener('keydown',(e)=>{
     };
     mediaRecorder.start();
     document.getElementById('emergencyBtn').classList.add('active');
-    socket.emit('emergency_start', currentUser);
+    if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(
+    pos=>{socket.emit('emergency_start',{username:currentUser,lat:pos.coords.latitude,lng:pos.coords.longitude});},
+    ()=>{socket.emit('emergency_start',{username:currentUser,lat:null,lng:null});}
+  );
+}else{
+  socket.emit('emergency_start',{username:currentUser,lat:null,lng:null});
+}
   }catch{alert('Izinkan akses mikrofon!');}
 }
 
