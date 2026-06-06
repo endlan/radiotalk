@@ -21,6 +21,8 @@ let pttState = {
   pttTimer: null
 };
 
+let pttDurasiDetik = 15;
+
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -356,20 +358,27 @@ socket.on('broadcast_clear', () => {
     io.emit('emergency_stop', {username});
   });
 
-  socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
-    if (adminUsername !== 'Endri') {
-      const isAdmin = await checkAdmin(adminUsername);
-      if (!isAdmin) {
-        socket.emit('reset_emergency_result', { success: false, message: 'Bukan admin!' });
-        return;
-      }
-    }
-    delete emergencyCount[targetUsername];
-    socket.emit('reset_emergency_result', { success: true, username: targetUsername });
-    console.log(`Emergency limit reset for: ${targetUsername} by ${adminUsername}`);
+  socket.on('leave_channel', () => { leaveCurrentChannel(); });
+
+  socket.on('set_ptt_durasi', async ({ adminUsername, detik }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) { socket.emit('set_ptt_durasi_result', { success: false, message: 'Bukan admin!' }); return; }
+    const d = parseInt(detik);
+    if (isNaN(d) || d < 5 || d > 60) { socket.emit('set_ptt_durasi_result', { success: false, message: 'Durasi harus 5-60 detik!' }); return; }
+    pttDurasiDetik = d;
+    socket.emit('set_ptt_durasi_result', { success: true, detik: pttDurasiDetik });
+    console.log('PTT durasi diubah ke:', pttDurasiDetik, 'detik oleh', adminUsername);
   });
 
-  socket.on('leave_channel', () => { leaveCurrentChannel(); });
+  socket.on('get_ptt_durasi', () => {
+    socket.emit('ptt_durasi_info', { detik: pttDurasiDetik });
+  });
+
+  socket.on('get_emergency_counts', async ({ adminUsername }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) return;
+    socket.emit('emergency_counts_info', { counts: emergencyCount });
+  });
 socket.on('ptt_start', (channel) => {
   socket.to(channel).emit('user_talking', currentUsername);
 });
@@ -413,7 +422,7 @@ if(mutedUsers.has(currentUsername)) {
         pttState.cooldownUntil = Date.now() + 3000;
         io.to(data.channel).emit('user_stop_talking');
         setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
-      }, 15000);
+      }, pttDurasiDetik * 1000);
     }
 
     socket.to(data.channel).emit('voice_data', data.audio);
