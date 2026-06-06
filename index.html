@@ -1037,6 +1037,21 @@ socket.on('broadcast_update', (pesan) => {
 socket.on('emergency_voice',(audioData)=>{
   const audio=new Audio(audioData);audio.play();
 });
+  socket.on('you_muted', () => {
+  alert('⚠ Kamu telah dimute oleh admin!');
+  document.getElementById('statusBadge').textContent = 'MUTED';
+});
+
+socket.on('user_muted', (username) => {
+  mutedUsersClient.add(username);
+});
+
+socket.on('user_unmuted', (username) => {
+  mutedUsersClient.delete(username);
+  if(document.getElementById('statusBadge').textContent === 'MUTED') {
+    document.getElementById('statusBadge').textContent = 'CONNECTED';
+  }
+});
 </script>
 </body>
 </html>
