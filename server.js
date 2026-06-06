@@ -326,7 +326,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
-
+socket.on('ptt_start', (channel) => {
+  socket.to(channel).emit('user_talking', currentUsername);
+});
   socket.on('voice_data', (data) => {
     const now = Date.now();
 
