@@ -1058,9 +1058,11 @@ document.addEventListener('keydown',(e)=>{
     };
     mediaRecorder.start();
     document.getElementById('emergencyBtn').classList.add('active');
-    if(navigator.geolocation){
+if(navigator.geolocation){
   navigator.geolocation.getCurrentPosition(
-    pos=>{socket.emit('emergency_start',{username:currentUser,lat:pos.coords.latitude,lng:pos.coords.longitude});},
+    pos=>{console.log('GPS OK:',pos.coords.latitude,pos.coords.longitude);socket.emit('emergency_start',{username:currentUser,lat:pos.coords.latitude,lng:pos.coords.longitude});},
+    err=>{console.log('GPS ERROR:',err);socket.emit('emergency_start',{username:currentUser,lat:null,lng:null});}
+  );
     ()=>{socket.emit('emergency_start',{username:currentUser,lat:null,lng:null});}
   );
 }else{
