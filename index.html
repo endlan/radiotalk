@@ -269,7 +269,15 @@
         <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
       </div>
     </div>
-
+<div class="admin-section">
+  <div class="admin-section-title">▷ PTT DURASI</div>
+  <div style="display:flex;align-items:center;gap:6px;padding:4px 0">
+    <input type="number" id="pttDurasiInput" min="5" max="60" value="15"
+      style="width:60px;padding:4px;background:#111;color:#0f0;border:1px solid #333;font-size:12px;text-align:center"/>
+    <span style="font-size:10px;color:#666">detik (5-60)</span>
+    <button class="admin-action-btn" style="background:#1a6b3a;color:#0f0;" onclick="setPttDurasi()">SET</button>
+  </div>
+</div>
     <div class="admin-section">
       <div class="admin-section-title">▷ CHANNELS</div>
       <div class="admin-ch-list" id="adminChList">
