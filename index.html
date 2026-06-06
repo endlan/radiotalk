@@ -819,7 +819,18 @@ function stopTalk(e){
 socket.on('voice_data',(audioData)=>{
   const audio=new Audio(audioData);audio.play();
 });
+function sendBroadcast() {
+  const pesan = document.getElementById('broadcastInput').value.trim();
+  if(!pesan) return;
+  socket.emit('broadcast_send', pesan);
+  document.getElementById('broadcastPreview').textContent = pesan;
+  document.getElementById('broadcastInput').value = '';
+}
 
+function clearBroadcast() {
+  socket.emit('broadcast_clear');
+  document.getElementById('broadcastPreview').textContent = '';
+}
 // ===== ADMIN PANEL =====
 async function openAdminPanel(){
   openModal('modalAdmin');
