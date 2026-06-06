@@ -7,10 +7,25 @@ const bcrypt = require('bcryptjs');
 const emergencyCount = {};
 const schedule = require('node-schedule');
 // Reset hitungan setiap hari jam 00:00
-schedule.scheduleJob('0 0 * * *', () => {
+schedule.scheduleJob('0 17 * * *', () => {
   Object.keys(emergencyCount).forEach(key => delete emergencyCount[key]);
   console.log('Emergency count reset');
 });
+let broadcastMessage = '';
+const mutedUsers = new Set();
+// PTT State
+let pttState = {
+  isBusy: false,
+  talkingUser: null,
+  cooldownUntil: 0,
+  pttTimer: null
+};
+
+let pttDurasiDetik = 15;
+
+// Track username per socket ID
+const socketUserMap = {};
+
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -31,10 +46,10 @@ app.use(express.json());
 app.get('/firebase-messaging-sw.js', (req, res) => {
   res.sendFile(__dirname + '/firebase-messaging-sw.js');
 });
-// Memory: track who is in which channel
-// { channelName: { socketId: username } }
+
 const channelMembers = {};
 const fcmTokens = {};
+
 // ===== AUTH =====
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -64,7 +79,6 @@ app.post('/login', async (req, res) => {
 });
 
 // ===== CHANNEL API =====
-// Get all channels
 app.get('/channels', async (req, res) => {
   try {
     const snap = await db.collection('channels').get();
@@ -77,7 +91,6 @@ app.get('/channels', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Create channel
 app.post('/channels', async (req, res) => {
   const { name, type, password, description, createdBy } = req.body;
   if (!name || !type) return res.json({ success: false, message: 'Nama dan tipe wajib diisi!' });
@@ -95,7 +108,6 @@ app.post('/channels', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Verify channel password
 app.post('/channels/verify', async (req, res) => {
   const { channelId, password } = req.body;
   try {
@@ -110,22 +122,18 @@ app.post('/channels/verify', async (req, res) => {
 });
 
 // ===== ADMIN API =====
-
-// Helper: cek apakah user adalah admin
 async function checkAdmin(username) {
   const doc = await db.collection('users').doc(username).get();
   if (!doc.exists) return false;
   return doc.data().isAdmin === true;
 }
 
-// Kick user dari channel
 app.post('/admin/kick', async (req, res) => {
   const { adminUsername, targetUsername, channelId } = req.body;
   try {
     if (!(await checkAdmin(adminUsername))) {
       return res.json({ success: false, message: 'Bukan admin!' });
     }
-    // Cari socket ID dari targetUsername di channel
     if (channelMembers[channelId]) {
       const targetSocketId = Object.keys(channelMembers[channelId]).find(
         sid => channelMembers[channelId][sid] === targetUsername
@@ -147,7 +155,6 @@ app.post('/admin/kick', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Ban user dari aplikasi
 app.post('/admin/ban', async (req, res) => {
   const { adminUsername, targetUsername } = req.body;
   try {
@@ -159,7 +166,6 @@ app.post('/admin/ban', async (req, res) => {
     if (!doc.exists) return res.json({ success: false, message: 'User tidak ditemukan!' });
     if (doc.data().isAdmin) return res.json({ success: false, message: 'Tidak bisa ban admin!' });
     await userRef.update({ banned: true });
-    // Kick dari semua channel yang sedang diikuti
     for (const [chId, members] of Object.entries(channelMembers)) {
       const targetSocketId = Object.keys(members).find(sid => members[sid] === targetUsername);
       if (targetSocketId) {
@@ -178,7 +184,6 @@ app.post('/admin/ban', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Unban user
 app.post('/admin/unban', async (req, res) => {
   const { adminUsername, targetUsername } = req.body;
   try {
@@ -193,7 +198,6 @@ app.post('/admin/unban', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Hapus channel
 app.delete('/admin/channel/:channelId', async (req, res) => {
   const { adminUsername } = req.body;
   const { channelId } = req.params;
@@ -202,7 +206,6 @@ app.delete('/admin/channel/:channelId', async (req, res) => {
       return res.json({ success: false, message: 'Bukan admin!' });
     }
     await db.collection('channels').doc(channelId).delete();
-    // Kick semua user dari channel
     if (channelMembers[channelId]) {
       io.to(channelId).emit('channel_deleted', { channelId });
       delete channelMembers[channelId];
@@ -212,7 +215,6 @@ app.delete('/admin/channel/:channelId', async (req, res) => {
   } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
-// Get all users (admin only)
 app.get('/admin/users', async (req, res) => {
   const { adminUsername } = req.query;
   try {
@@ -234,18 +236,75 @@ io.on('connection', (socket) => {
   let currentChannel = null;
   let currentUsername = null;
   let isTalking = false;
+  let pttLimitTimer = null;
 
-  socket.on('set_username', (username) => { currentUsername = username; });
-socket.on('register_fcm_token', ({username, token}) => {
-  fcmTokens[username] = token;
-  console.log('FCM token registered:', username);
-});
-socket.on('debug', (msg) => {
-  console.log('DEBUG:', msg);
-});
-function leaveCurrentChannel() {
+  socket.on('set_username', (username) => {
+    // Kick semua koneksi lama dengan username yang sama
+    for (const [sid, uname] of Object.entries(socketUserMap)) {
+      if (uname === username && sid !== socket.id) {
+        const oldSocket = io.sockets.sockets.get(sid);
+        if (oldSocket) {
+          oldSocket.emit('kicked_duplicate', { reason: 'Akun kamu dibuka di perangkat lain' });
+          oldSocket.disconnect(true);
+        }
+        delete socketUserMap[sid];
+      }
+    }
+    socketUserMap[socket.id] = username;
+    currentUsername = username;
+    if(broadcastMessage) socket.emit('broadcast_update', broadcastMessage);
+  });
+
+  socket.on('register_fcm_token', ({username, token}) => {
+    fcmTokens[username] = token;
+    console.log('FCM token registered:', username);
+  });
+
+  socket.on('mute_user', (targetUsername) => {
+    if(currentUsername !== 'Endri') return;
+    mutedUsers.add(targetUsername);
+    for(const [sid, socket2] of io.sockets.sockets) {
+      if(channelMembers[currentChannel] && channelMembers[currentChannel][sid] === targetUsername) {
+        socket2.emit('you_muted');
+      }
+    }
+    io.emit('user_muted', targetUsername);
+  });
+
+  socket.on('unmute_user', (targetUsername) => {
+    if(currentUsername !== 'Endri') return;
+    mutedUsers.delete(targetUsername);
+    io.emit('user_unmuted', targetUsername);
+  });
+
+  socket.on('broadcast_send', (pesan) => {
+    if(currentUsername !== 'Endri') return;
+    broadcastMessage = pesan;
+    io.emit('broadcast_update', pesan);
+  });
+
+  socket.on('broadcast_clear', () => {
+    if(currentUsername !== 'Endri') return;
+    broadcastMessage = '';
+    io.emit('broadcast_update', '');
+  });
+
+  socket.on('debug', (msg) => {
+    console.log('DEBUG:', msg);
+  });
+
+  function leaveCurrentChannel() {
     if (currentChannel) {
-      socket.to(currentChannel).emit('user_stop_talking'); // ← TAMBAH INI
+      if (pttState.talkingUser === currentUsername) {
+        pttState.isBusy = false;
+        pttState.talkingUser = null;
+        if (pttState.pttTimer) clearTimeout(pttState.pttTimer);
+        pttState.pttTimer = null;
+        pttState.cooldownUntil = Date.now() + 3000;
+        setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
+        socket.to(currentChannel).emit('user_stop_talking');
+      }
+      if (pttLimitTimer) { clearTimeout(pttLimitTimer); pttLimitTimer = null; }
       socket.leave(currentChannel);
       if (channelMembers[currentChannel]) {
         delete channelMembers[currentChannel][socket.id];
@@ -269,64 +328,139 @@ function leaveCurrentChannel() {
     io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
     console.log(`${currentUsername} join: ${channel}`);
   });
-socket.on('rejoin_channel', ({ channel, username }) => {
-  currentChannel = channel;
-  currentUsername = username || currentUsername;
-  socket.join(channel);
-  if (!channelMembers[channel]) channelMembers[channel] = {};
-  channelMembers[channel][socket.id] = currentUsername;
-  const members = Object.values(channelMembers[channel]);
-  io.to(channel).emit('channel_members', members);
-  io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
-});
+
+  socket.on('rejoin_channel', ({ channel, username }) => {
+    currentChannel = channel;
+    currentUsername = username || currentUsername;
+    socket.join(channel);
+    if (!channelMembers[channel]) channelMembers[channel] = {};
+    channelMembers[channel][socket.id] = currentUsername;
+    const members = Object.values(channelMembers[channel]);
+    io.to(channel).emit('channel_members', members);
+    io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
+  });
+
   socket.on('emergency_start', async (username) => {
-  if(username !== 'Endri') {
-    if((emergencyCount[username] || 0) >= 2) {
-      socket.emit('emergency_limit', 'Batas emergency harian sudah tercapai');
+    if(username !== 'Endri') {
+      if((emergencyCount[username] || 0) >= 2) {
+        socket.emit('emergency_limit', 'Batas emergency harian sudah tercapai');
+        return;
+      }
+      emergencyCount[username] = (emergencyCount[username] || 0) + 1;
+    }
+    io.emit('emergency_alert', {username});
+    await admin.messaging().send({
+      topic: 'emergency',
+      notification: {
+        title: '🚨 EMERGENCY!',
+        body: username.toUpperCase() + ' membutuhkan bantuan!'
+      },
+      android: {
+        priority: 'high',
+        notification: {
+          sound: 'default',
+          channelId: 'RadioTalkChannel'
+        }
+      }
+    }).catch(err => console.log('FCM error:', err));
+  });
+
+  socket.on('emergency_data', (data) => {
+    io.emit('emergency_voice', data.audio);
+  });
+
+  socket.on('emergency_end', (username) => {
+    io.emit('emergency_stop', {username});
+  });
+
+  socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) {
+      socket.emit('reset_emergency_result', { success: false, message: 'Bukan admin!' });
       return;
     }
-    emergencyCount[username] = (emergencyCount[username] || 0) + 1;
-  }
+    delete emergencyCount[targetUsername];
+    socket.emit('reset_emergency_result', { success: true, username: targetUsername });
+    console.log(`Emergency limit reset for: ${targetUsername} by ${adminUsername}`);
+  });
 
-  io.emit('emergency_alert', {username});
-  await admin.messaging().send({
-    topic: 'emergency',
-    notification: {
-      title: '🚨 EMERGENCY!',
-      body: username.toUpperCase() + ' membutuhkan bantuan!'
-    },
-    android: {
-      priority: 'high',
-      notification: {
-        sound: 'default',
-        channelId: 'RadioTalkChannel'
-      }
-    }
-  }).catch(err => console.log('FCM error:', err));
-});
-
-socket.on('emergency_data', (data) => {
-  io.emit('emergency_voice', data.audio);
-});
-
-socket.on('emergency_end', (username) => {
-  io.emit('emergency_stop', {username});
-});
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
 
-socket.on('voice_data', (data) => {
+  socket.on('set_ptt_durasi', async ({ adminUsername, detik }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) { socket.emit('set_ptt_durasi_result', { success: false, message: 'Bukan admin!' }); return; }
+    const d = parseInt(detik);
+    if (isNaN(d) || d < 5 || d > 60) { socket.emit('set_ptt_durasi_result', { success: false, message: 'Durasi harus 5-60 detik!' }); return; }
+    pttDurasiDetik = d;
+    socket.emit('set_ptt_durasi_result', { success: true, detik: pttDurasiDetik });
+    console.log('PTT durasi diubah ke:', pttDurasiDetik, 'detik oleh', adminUsername);
+  });
+
+  socket.on('get_ptt_durasi', () => {
+    socket.emit('ptt_durasi_info', { detik: pttDurasiDetik });
+  });
+
+  socket.on('get_emergency_counts', async ({ adminUsername }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) return;
+    socket.emit('emergency_counts_info', { counts: emergencyCount });
+  });
+
+  socket.on('ptt_start', (channel) => {
+    socket.to(channel).emit('user_talking', currentUsername);
+  });
+
+  socket.on('voice_data', (data) => {
+    const now = Date.now();
+    if(mutedUsers.has(currentUsername)) {
+      socket.emit('ptt_rejected', { reason: 'muted' });
+      return;
+    }
+    if (pttState.cooldownUntil > now) {
+      const sisaMs = pttState.cooldownUntil - now;
+      socket.emit('ptt_rejected', { reason: 'cooldown', sisaDetik: Math.ceil(sisaMs / 1000) });
+      return;
+    }
+    if (pttState.isBusy && pttState.talkingUser !== currentUsername) {
+      socket.emit('ptt_rejected', { reason: 'busy', talkingUser: pttState.talkingUser });
+      return;
+    }
     if (!isTalking) {
       isTalking = true;
+      pttState.isBusy = true;
+      pttState.talkingUser = currentUsername;
       socket.to(data.channel).emit('user_talking', currentUsername);
+      if (pttState.pttTimer) clearTimeout(pttState.pttTimer);
+      pttState.pttTimer = setTimeout(() => {
+        socket.emit('ptt_timeout');
+        isTalking = false;
+        pttState.isBusy = false;
+        pttState.talkingUser = null;
+        pttState.pttTimer = null;
+        pttState.cooldownUntil = Date.now() + 3000;
+        io.to(data.channel).emit('user_stop_talking');
+        setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
+      }, pttDurasiDetik * 1000);
     }
     socket.to(data.channel).emit('voice_data', data.audio);
   });
+
   socket.on('voice_end', (channel) => {
+    if (!isTalking) return;
     isTalking = false;
+    if (pttState.talkingUser === currentUsername) {
+      pttState.isBusy = false;
+      pttState.talkingUser = null;
+      if (pttState.pttTimer) { clearTimeout(pttState.pttTimer); pttState.pttTimer = null; }
+      pttState.cooldownUntil = Date.now() + 3000;
+      setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
+    }
     socket.to(channel).emit('user_stop_talking');
   });
+
   socket.on('disconnect', () => {
     console.log('User keluar:', socket.id);
+    delete socketUserMap[socket.id];
     leaveCurrentChannel();
   });
 });
