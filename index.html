@@ -681,7 +681,12 @@ async function setupPushNotifications() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         try {
           await FirebaseMessaging.requestPermissions();
-          ready = true;
+// Request GPS permission
+try{
+  const {Geolocation} = Capacitor.Plugins;
+  await Geolocation.requestPermissions();
+}catch(e){console.log('GPS permission error:',e);}
+ready = true;
           break;
         } catch(e) {
           socket.emit('debug', 'Firebase not ready, retry ' + (i+1));
