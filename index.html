@@ -1006,6 +1006,9 @@ socket.on('kicked',({channel,reason})=>{
 });
 socket.on('kicked_duplicate', (data) => {
   alert('⚠️ ' + data.reason);
+  localStorage.removeItem('savedUser');
+  localStorage.removeItem('savedAdmin');
+  localStorage.removeItem('savedChannel');
   location.reload();
 });
 socket.on('banned',({reason})=>{
