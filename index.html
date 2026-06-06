@@ -897,7 +897,19 @@ async function adminKick(targetUsername){
     if(d.success) await loadAdminUsers();
   }catch{setAdminMsg('✖ SERVER ERROR',true);}
 }
-
+function toggleMute(targetUsername, btn) {
+  if(mutedUsersClient.has(targetUsername)) {
+    socket.emit('unmute_user', targetUsername);
+    mutedUsersClient.delete(targetUsername);
+    btn.textContent = 'MUTE';
+    btn.style.background = '#555';
+  } else {
+    socket.emit('mute_user', targetUsername);
+    mutedUsersClient.add(targetUsername);
+    btn.textContent = 'UNMUTE';
+    btn.style.background = '#cc7700';
+  }
+}
 async function adminBan(targetUsername){
   if(!confirm(`Ban ${targetUsername}? User ini tidak bisa login lagi.`)) return;
   try{
