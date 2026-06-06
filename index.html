@@ -793,6 +793,7 @@ mediaRecorder.onstop=()=>{
   reader.readAsDataURL(blob);
   stream.getTracks().forEach(t=>t.stop());
 };    mediaRecorder.start(250);
+    socket.emit('ptt_start', currentChannel);
     document.getElementById('pttBtn').classList.add('talking');
     document.getElementById('txIndicator').classList.add('active');
     document.getElementById('statusBadge').textContent='▶ '+currentUser.toUpperCase();
