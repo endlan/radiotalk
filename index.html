@@ -794,7 +794,7 @@ mediaRecorder.ondataavailable=e=>{
 mediaRecorder.onstop=()=>{
   socket.emit('voice_end',currentChannel);
   stream.getTracks().forEach(t=>t.stop());
-};};
+};
     mediaRecorder.start(250);
     document.getElementById('pttBtn').classList.add('talking');
     document.getElementById('txIndicator').classList.add('active');
