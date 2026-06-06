@@ -23,6 +23,9 @@ let pttState = {
 
 let pttDurasiDetik = 15;
 
+// Track username per socket ID
+const socketUserMap = {};
+
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -236,72 +239,67 @@ io.on('connection', (socket) => {
   let pttLimitTimer = null;
 
   socket.on('set_username', (username) => {
-  // Kick koneksi lama jika username sudah online di device lain
-  for (const [sid, otherSocket] of io.sockets.sockets) {
-    if (sid !== socket.id) {
-      // Cek apakah username ini sudah dipakai socket lain
-      let isOtherUser = false;
-      for (const chId of Object.keys(channelMembers)) {
-        if (channelMembers[chId][sid] === username) {
-          isOtherUser = true;
-          break;
+    // Kick semua koneksi lama dengan username yang sama
+    for (const [sid, uname] of Object.entries(socketUserMap)) {
+      if (uname === username && sid !== socket.id) {
+        const oldSocket = io.sockets.sockets.get(sid);
+        if (oldSocket) {
+          oldSocket.emit('kicked_duplicate', { reason: 'Akun kamu dibuka di perangkat lain' });
+          oldSocket.disconnect(true);
         }
-      }
-      if (isOtherUser) {
-        otherSocket.emit('kicked_duplicate', { reason: 'Akun kamu dibuka di perangkat lain' });
-        otherSocket.disconnect(true);
+        delete socketUserMap[sid];
       }
     }
-  }
-  currentUsername = username;
-  if(broadcastMessage) socket.emit('broadcast_update', broadcastMessage);
-});
+    socketUserMap[socket.id] = username;
+    currentUsername = username;
+    if(broadcastMessage) socket.emit('broadcast_update', broadcastMessage);
+  });
 
   socket.on('register_fcm_token', ({username, token}) => {
     fcmTokens[username] = token;
     console.log('FCM token registered:', username);
   });
+
   socket.on('mute_user', (targetUsername) => {
-  if(currentUsername !== 'Endri') return;
-  mutedUsers.add(targetUsername);
-  // Kirim notif ke user yang dimute
-  for(const [sid, socket2] of io.sockets.sockets) {
-    if(channelMembers[currentChannel] && channelMembers[currentChannel][sid] === targetUsername) {
-      socket2.emit('you_muted');
+    if(currentUsername !== 'Endri') return;
+    mutedUsers.add(targetUsername);
+    for(const [sid, socket2] of io.sockets.sockets) {
+      if(channelMembers[currentChannel] && channelMembers[currentChannel][sid] === targetUsername) {
+        socket2.emit('you_muted');
+      }
     }
-  }
-  io.emit('user_muted', targetUsername);
-});
+    io.emit('user_muted', targetUsername);
+  });
 
-socket.on('unmute_user', (targetUsername) => {
-  if(currentUsername !== 'Endri') return;
-  mutedUsers.delete(targetUsername);
-  io.emit('user_unmuted', targetUsername);
-});
-socket.on('broadcast_send', (pesan) => {
-  if(currentUsername !== 'Endri') return;
-  broadcastMessage = pesan;
-  io.emit('broadcast_update', pesan);
-});
+  socket.on('unmute_user', (targetUsername) => {
+    if(currentUsername !== 'Endri') return;
+    mutedUsers.delete(targetUsername);
+    io.emit('user_unmuted', targetUsername);
+  });
 
-socket.on('broadcast_clear', () => {
-  if(currentUsername !== 'Endri') return;
-  broadcastMessage = '';
-  io.emit('broadcast_update', '');
-});
+  socket.on('broadcast_send', (pesan) => {
+    if(currentUsername !== 'Endri') return;
+    broadcastMessage = pesan;
+    io.emit('broadcast_update', pesan);
+  });
+
+  socket.on('broadcast_clear', () => {
+    if(currentUsername !== 'Endri') return;
+    broadcastMessage = '';
+    io.emit('broadcast_update', '');
+  });
+
   socket.on('debug', (msg) => {
     console.log('DEBUG:', msg);
   });
 
   function leaveCurrentChannel() {
     if (currentChannel) {
-      // Kalau user yang disconnect sedang talking, reset PTT state
       if (pttState.talkingUser === currentUsername) {
         pttState.isBusy = false;
         pttState.talkingUser = null;
         if (pttState.pttTimer) clearTimeout(pttState.pttTimer);
         pttState.pttTimer = null;
-        // Mulai cooldown
         pttState.cooldownUntil = Date.now() + 3000;
         setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
         socket.to(currentChannel).emit('user_stop_talking');
@@ -375,7 +373,6 @@ socket.on('broadcast_clear', () => {
     io.emit('emergency_stop', {username});
   });
 
-  // TAMBAHKAN INI:
   socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
     const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
     if (!isAdmin) {
@@ -408,75 +405,62 @@ socket.on('broadcast_clear', () => {
     if (!isAdmin) return;
     socket.emit('emergency_counts_info', { counts: emergencyCount });
   });
-socket.on('ptt_start', (channel) => {
-  socket.to(channel).emit('user_talking', currentUsername);
-});
+
+  socket.on('ptt_start', (channel) => {
+    socket.to(channel).emit('user_talking', currentUsername);
+  });
+
   socket.on('voice_data', (data) => {
     const now = Date.now();
-// Cek apakah user dimute
-if(mutedUsers.has(currentUsername)) {
-  socket.emit('ptt_rejected', { reason: 'muted' });
-  return;
-}
-    // Cek cooldown
+    if(mutedUsers.has(currentUsername)) {
+      socket.emit('ptt_rejected', { reason: 'muted' });
+      return;
+    }
     if (pttState.cooldownUntil > now) {
       const sisaMs = pttState.cooldownUntil - now;
       socket.emit('ptt_rejected', { reason: 'cooldown', sisaDetik: Math.ceil(sisaMs / 1000) });
       return;
     }
-
-    // Cek apakah channel sedang dipakai user lain
     if (pttState.isBusy && pttState.talkingUser !== currentUsername) {
       socket.emit('ptt_rejected', { reason: 'busy', talkingUser: pttState.talkingUser });
       return;
     }
-
-    // Mulai talking
     if (!isTalking) {
       isTalking = true;
       pttState.isBusy = true;
       pttState.talkingUser = currentUsername;
       socket.to(data.channel).emit('user_talking', currentUsername);
-
-      // Limit PTT 15 detik
       if (pttState.pttTimer) clearTimeout(pttState.pttTimer);
       pttState.pttTimer = setTimeout(() => {
-        // Paksa stop setelah 15 detik
         socket.emit('ptt_timeout');
         isTalking = false;
         pttState.isBusy = false;
         pttState.talkingUser = null;
         pttState.pttTimer = null;
-        // Mulai cooldown 3 detik
         pttState.cooldownUntil = Date.now() + 3000;
         io.to(data.channel).emit('user_stop_talking');
         setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
       }, pttDurasiDetik * 1000);
     }
-
     socket.to(data.channel).emit('voice_data', data.audio);
   });
 
   socket.on('voice_end', (channel) => {
     if (!isTalking) return;
     isTalking = false;
-
-    // Reset PTT state
     if (pttState.talkingUser === currentUsername) {
       pttState.isBusy = false;
       pttState.talkingUser = null;
       if (pttState.pttTimer) { clearTimeout(pttState.pttTimer); pttState.pttTimer = null; }
-
-      // Mulai cooldown 3 detik
       pttState.cooldownUntil = Date.now() + 3000;
       setTimeout(() => { pttState.cooldownUntil = 0; }, 3000);
     }
-
     socket.to(channel).emit('user_stop_talking');
   });
 
   socket.on('disconnect', () => {
     console.log('User keluar:', socket.id);
+    delete socketUserMap[socket.id];
     leaveCurrentChannel();
   });
 });
