@@ -358,6 +358,18 @@ socket.on('broadcast_clear', () => {
     io.emit('emergency_stop', {username});
   });
 
+  // TAMBAHKAN INI:
+  socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
+    const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+    if (!isAdmin) {
+      socket.emit('reset_emergency_result', { success: false, message: 'Bukan admin!' });
+      return;
+    }
+    delete emergencyCount[targetUsername];
+    socket.emit('reset_emergency_result', { success: true, username: targetUsername });
+    console.log(`Emergency limit reset for: ${targetUsername} by ${adminUsername}`);
+  });
+
   socket.on('leave_channel', () => { leaveCurrentChannel(); });
 
   socket.on('set_ptt_durasi', async ({ adminUsername, detik }) => {
