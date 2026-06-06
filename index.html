@@ -1075,11 +1075,17 @@ socket.on('emergency_alert',({username})=>{
   notif.textContent='🚨 EMERGENCY dari '+username.toUpperCase()+'!';
   document.body.appendChild(notif);
   setTimeout(()=>notif.remove(),5000);
-  // Putar sirine sebelum suara user
+  // Putar sirine
   try {
-    const siren = new Audio('/emergency_alert.mp3');
+    const siren = new Audio('https://radiotalk-production-8d66.up.railway.app/emergency_alert.wav');
     siren.volume = 1.0;
-    siren.play();
+    const playPromise = siren.play();
+    if(playPromise !== undefined) {
+      playPromise.catch(e => {
+        // Coba lagi dengan user gesture workaround
+        document.addEventListener('touchstart', () => siren.play(), {once: true});
+      });
+    }
   } catch(e) { console.log('Siren error:', e); }
 });
 socket.on('emergency_limit', (pesan) => {
