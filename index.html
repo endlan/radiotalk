@@ -1013,7 +1013,13 @@ socket.on('emergency_alert',({username})=>{
 socket.on('emergency_limit', (pesan) => {
   alert(pesan);
 });
-
+socket.on('broadcast_update', (pesan) => {
+  const el = document.getElementById('broadcastMsg');
+  if(el) {
+    el.textContent = pesan ? '📢 ' + pesan : '';
+    el.style.display = pesan ? 'block' : 'none';
+  }
+});
 socket.on('emergency_voice',(audioData)=>{
   const audio=new Audio(audioData);audio.play();
 });
