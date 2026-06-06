@@ -751,7 +751,30 @@ socket.on('user_stop_talking',()=>{
   document.querySelectorAll('.badge-tx').forEach(b=>b.remove());
   if(currentChannel) document.getElementById('statusBadge').textContent='CONNECTED';
 });
+socket.on('ptt_rejected', ({reason, sisaDetik, talkingUser}) => {
+  if(reason === 'cooldown') {
+    document.getElementById('statusBadge').textContent = 'COOLDOWN ' + sisaDetik + 's';
+    setTimeout(() => {
+      if(currentChannel) document.getElementById('statusBadge').textContent = 'CONNECTED';
+    }, sisaDetik * 1000);
+  } else if(reason === 'busy') {
+    document.getElementById('statusBadge').textContent = talkingUser + ' SEDANG BICARA';
+    setTimeout(() => {
+      if(currentChannel) document.getElementById('statusBadge').textContent = 'CONNECTED';
+    }, 2000);
+  }
+});
 
+socket.on('ptt_timeout', () => {
+  if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  document.getElementById('pttBtn').classList.remove('talking');
+  document.getElementById('txIndicator').classList.remove('active');
+  document.getElementById('statusBadge').textContent = 'COOLDOWN 3s';
+  document.getElementById('waveform').classList.remove('active');
+  setTimeout(() => {
+    if(currentChannel) document.getElementById('statusBadge').textContent = 'CONNECTED';
+  }, 3000);
+});
 async function startTalk(e){
   e.preventDefault();
   if(!currentChannel) return;
