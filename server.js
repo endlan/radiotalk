@@ -11,7 +11,7 @@ schedule.scheduleJob('0 17 * * *', () => {
   Object.keys(emergencyCount).forEach(key => delete emergencyCount[key]);
   console.log('Emergency count reset');
 });
-
+let broadcastMessage = '';
 // PTT State
 let pttState = {
   isBusy: false,
