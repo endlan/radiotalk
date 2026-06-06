@@ -1080,7 +1080,7 @@ socket.on('emergency_alert', ({ username }) => {
   setTimeout(() => document.body.style.border = '', 300000);
 
   // Notif di speaker grille
-  const speakerArea = document.getElementById('speakerArea');
+  const speakerArea = document.querySelector('.speaker');
   if (speakerArea) {
     const notif = document.createElement('div');
     notif.id = 'emergencyNotif';
