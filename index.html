@@ -793,10 +793,10 @@ mediaRecorder.onstop=()=>{
   reader.readAsDataURL(blob);
   stream.getTracks().forEach(t=>t.stop());
 };
-    mediaRecorder.start();
+    mediaRecorder.start(250);
     document.getElementById('pttBtn').classList.add('talking');
     document.getElementById('txIndicator').classList.add('active');
-    document.getElementById('statusBadge').textContent='TRANSMIT';
+    document.getElementById('statusBadge').textContent='▶ '+currentUser.toUpperCase();
     document.getElementById('waveform').classList.add('active');
   }catch{alert('Izinkan akses mikrofon!');}
 }
