@@ -252,10 +252,6 @@
 }
 .emergency-icon { font-size: 20px; }
 .emergency-label { font-size: 10px; letter-spacing: 3px; }
-    #speaker-indicator {
-  transition: none !important;
-  animation: none !important;
-}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
@@ -280,18 +276,7 @@
         <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
       </div>
     </div>
-<div class="admin-section">
-  <div class="admin-section-title">▷ BROADCAST</div>
-  <div class="form-field">
-    <label class="form-label">▷ CHANNEL (kosong = semua)</label>
-    <input class="form-input" id="announceChannel" placeholder="nama channel / kosongkan" />
-  </div>
-  <div class="form-field">
-    <label class="form-label">▷ PESAN</label>
-    <input class="form-input" id="announceMsg" placeholder="tulis pengumuman..." />
-  </div>
-  <button class="btn-ok" style="width:100%" onclick="doAnnounce()">📢 KIRIM BROADCAST</button>
-</div>
+
     <div class="admin-msg" id="adminMsg"></div>
     <button class="btn-cancel" style="width:100%;margin-top:4px" onclick="closeModal('modalAdmin')">TUTUP</button>
   </div>
@@ -347,15 +332,6 @@
 <div style="position:relative">
   <div class="antenna"></div>
   <div class="ht-body">
-    <!-- Indikator speaker aktif -->
-<div id="speaker-indicator" style="display:none; background:#1a3a1a; color:#4eff4e; 
-  padding:8px 12px; border-radius:8px; font-family:monospace; text-align:center;">
-</div>
-
-<!-- Banner pengumuman -->
-<div id="announcement-banner" style="display:none; background:#b35000; color:#fff;
-  padding:10px 14px; border-radius:8px; font-weight:bold; text-align:center;">
-</div>
     <div class="screw screw-tl"></div><div class="screw screw-tr"></div>
     <div class="screw screw-bl"></div><div class="screw screw-br"></div>
     <div class="side-controls"><div class="side-btn vol"></div><div class="side-btn"></div></div>
@@ -755,96 +731,27 @@ socket.on('channel_update',(data)=>{
   if(ch){ch.memberCount=data.memberCount;ch.members=data.members;renderChannels();}
 });
 
-socket.on('user_talking', (username) => {
-  talkingUser = username;
-  // Update member list (kode lama)
-  document.querySelectorAll('.member-item').forEach(item => {
-    const n = item.querySelector('.member-name');
-    const dot = item.querySelector('.member-dot');
-    if (n && n.textContent.toLowerCase() === username) {
-      dot.classList.add('talking'); n.classList.add('talking');
-      if (!item.querySelector('.badge-tx')) {
-        const b = document.createElement('span');
-        b.className = 'm-badge badge-tx'; b.textContent = 'TX';
-        item.appendChild(b);
-      }
+socket.on('user_talking',(username)=>{
+  talkingUser=username;
+  document.querySelectorAll('.member-item').forEach(item=>{
+    const n=item.querySelector('.member-name');
+    const dot=item.querySelector('.member-dot');
+    if(n&&n.textContent.toLowerCase()===username){
+      dot.classList.add('talking');n.classList.add('talking');
+      if(!item.querySelector('.badge-tx')){const b=document.createElement('span');b.className='m-badge badge-tx';b.textContent='TX';item.appendChild(b);}
     }
   });
-  document.getElementById('statusBadge').textContent = '▶ ' + username.toUpperCase();
-  // Update speaker-indicator (BARU)
-  const si = document.getElementById('speaker-indicator');
-  si.textContent = '🎙 ' + username.toUpperCase() + ' SEDANG BICARA...';
-si.style.display = 'block';
-si.style.animation = 'none'; // matikan animasi berkedip
+  document.getElementById('statusBadge').textContent='▶ '+username.toUpperCase();
 });
-socket.on('user_stop_talking', () => {
+
+socket.on('user_stop_talking',()=>{
   talkingUser=null;
   document.querySelectorAll('.member-dot').forEach(d=>d.classList.remove('talking'));
   document.querySelectorAll('.member-name').forEach(n=>n.classList.remove('talking'));
   document.querySelectorAll('.badge-tx').forEach(b=>b.remove());
   if(currentChannel) document.getElementById('statusBadge').textContent='CONNECTED';
-  document.getElementById('speaker-indicator').style.display = 'none'; // ← TAMBAH INI
-});
-// Banner pengumuman
-socket.on('announcement', (data) => {
-  const el = document.getElementById('announcement-banner');
-  el.textContent = '📢 ' + data.message;
-  el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 7000);
 });
 
-// Notif user dimute
-socket.on('you_muted', () => {
-  showToast('🔇 Kamu dibisukan oleh admin', '#cc0000');
-  document.getElementById('pttBtn').style.display = 'none';
-  document.getElementById('pttDisabled').style.display = 'flex';
-  document.getElementById('pttDisabled').querySelector('.ptt-disabled-text').textContent = 'MUTED\nOLEH\nADMIN';
-});
-
-// Notif user di-unmute
-socket.on('you_unmuted', () => {
-  showToast('🔊 Kamu sudah bisa bicara lagi', '#00ff88');
-  if (currentChannel) {
-    document.getElementById('pttBtn').style.display = 'flex';
-    document.getElementById('pttDisabled').style.display = 'none';
-    document.getElementById('pttDisabled').querySelector('.ptt-disabled-text').textContent = 'TUNE TO\nCHANNEL\nFIRST';
-  }
-});
-
-// Notif PTT ditolak
-socket.on('ptt_rejected', (data) => {
-  if (data.reason === 'cooldown') {
-    showToast('⏱ Tunggu ' + Math.ceil(data.remaining / 1000) + ' detik...', '#cc5500');
-  } else if (data.reason === 'busy') {
-    showToast('📻 ' + data.speaker.toUpperCase() + ' SEDANG BICARA', '#cc5500');
-  } else if (data.reason === 'muted') {
-    showToast('🔇 Kamu sedang dibisukan', '#cc0000');
-  }
-});
-
-// Notif waktu bicara habis
-socket.on('ptt_timeout', (data) => {
-  showToast('⏰ Waktu bicara habis! (15 detik)', '#cc0000');
-  document.getElementById('pttBtn').classList.remove('talking');
-  document.getElementById('txIndicator').classList.remove('active');
-  document.getElementById('statusBadge').textContent = 'CONNECTED';
-  document.getElementById('waveform').classList.remove('active');
-});
-
-// Fungsi toast notif
-function showToast(msg, color) {
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    position:fixed; top:20px; left:50%; transform:translateX(-50%);
-    background:${color || '#333'}; color:#fff; padding:10px 18px;
-    border-radius:8px; font-family:monospace; font-size:12px;
-    z-index:9999; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.5);
-    max-width:280px;
-  `;
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-}
 async function startTalk(e){
   e.preventDefault();
   if(!currentChannel) return;
@@ -909,9 +816,7 @@ async function loadAdminUsers(){
         ${!u.isAdmin&&!u.banned&&currentChannel?`<button class="admin-action-btn btn-kick" onclick="adminKick('${u.username}')">KICK</button>`:''}
         ${!u.isAdmin&&!u.banned?`<button class="admin-action-btn btn-ban" onclick="adminBan('${u.username}')">BAN</button>`:''}
         ${u.banned?`<button class="admin-action-btn btn-unban" onclick="adminUnban('${u.username}')">UNBAN</button>`:''}
-      ${!u.isAdmin&&!u.banned&&u.muted?`<button class="admin-action-btn" style="background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.3)" onclick="adminUnmute('${u.username}')">UNMUTE</button>`:''}
-${!u.isAdmin&&!u.banned&&!u.muted?`<button class="admin-action-btn" style="background:rgba(255,204,0,0.1);color:#ffcc00;border:1px solid rgba(255,204,0,0.3)" onclick="adminMute('${u.username}')">MUTE</button>`:''}
-      ;
+      `;
       list.appendChild(div);
     });
     if(list.children.length===0) list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA USER LAIN</div>';
@@ -966,35 +871,8 @@ async function adminUnban(targetUsername){
     setAdminMsg(d.success?`✔ ${targetUsername} di-unban!`:'✖ '+d.message,!d.success);
     if(d.success) await loadAdminUsers();
   }catch{setAdminMsg('✖ SERVER ERROR',true);}
-  async function adminMute(targetUsername){
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/mute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
-    const d=await r.json();
-    setAdminMsg(d.success?`✔ ${targetUsername} dimute!`:'✖ '+d.message,!d.success);
-    if(d.success) await loadAdminUsers();
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
 }
 
-async function adminUnmute(targetUsername){
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/unmute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
-    const d=await r.json();
-    setAdminMsg(d.success?`✔ ${targetUsername} di-unmute!`:'✖ '+d.message,!d.success);
-    if(d.success) await loadAdminUsers();
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
-}
-}
-async function doAnnounce(){
-  const msg=document.getElementById('announceMsg').value.trim();
-  const ch=document.getElementById('announceChannel').value.trim();
-  if(!msg){setAdminMsg('⚠ Pesan tidak boleh kosong!',true);return;}
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/announce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,channelId:ch||null,message:msg})});
-    const d=await r.json();
-    setAdminMsg(d.success?'✔ Broadcast terkirim!':'✖ '+d.message,!d.success);
-    if(d.success) document.getElementById('announceMsg').value='';
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
-}
 async function adminDeleteChannel(channelId){
   if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
   try{
