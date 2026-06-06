@@ -911,6 +911,7 @@ async function loadAdminUsers(){
         ${u.banned?`<button class="admin-action-btn btn-unban" onclick="adminUnban('${u.username}')">UNBAN</button>`:''}
       ${!u.isAdmin&&!u.banned&&u.muted?`<button class="admin-action-btn" style="background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.3)" onclick="adminUnmute('${u.username}')">UNMUTE</button>`:''}
 ${!u.isAdmin&&!u.banned&&!u.muted?`<button class="admin-action-btn" style="background:rgba(255,204,0,0.1);color:#ffcc00;border:1px solid rgba(255,204,0,0.3)" onclick="adminMute('${u.username}')">MUTE</button>`:''}
+      ;
       list.appendChild(div);
     });
     if(list.children.length===0) list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">TIDAK ADA USER LAIN</div>';
