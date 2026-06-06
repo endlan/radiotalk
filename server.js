@@ -232,13 +232,26 @@ io.on('connection', (socket) => {
   let isTalking = false;
   let pttLimitTimer = null;
 
-  socket.on('set_username', (username) => { currentUsername = username; });
+  socket.on('set_username', (username) => { 
+  currentUsername = username;
+  if(broadcastMessage) socket.emit('broadcast_update', broadcastMessage);
+});
 
   socket.on('register_fcm_token', ({username, token}) => {
     fcmTokens[username] = token;
     console.log('FCM token registered:', username);
   });
+socket.on('broadcast_send', (pesan) => {
+  if(currentUsername !== 'Endri') return;
+  broadcastMessage = pesan;
+  io.emit('broadcast_update', pesan);
+});
 
+socket.on('broadcast_clear', () => {
+  if(currentUsername !== 'Endri') return;
+  broadcastMessage = '';
+  io.emit('broadcast_update', '');
+});
   socket.on('debug', (msg) => {
     console.log('DEBUG:', msg);
   });
