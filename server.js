@@ -340,7 +340,7 @@ io.on('connection', (socket) => {
     io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
   });
 
-  socket.on('emergency_start', async (username) => {
+  socket.on('emergency_start', async ({username, lat, lng}) => {
     if(username !== 'Endri') {
       if((emergencyCount[username] || 0) >= 2) {
         socket.emit('emergency_limit', 'Batas emergency harian sudah tercapai');
