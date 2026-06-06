@@ -929,6 +929,19 @@ async function adminUnban(targetUsername){
     if(d.success) await loadAdminUsers();
   }catch{setAdminMsg('✖ SERVER ERROR',true);}
 }
+// TAMBAHKAN INI:
+function resetEmergency(username){
+  if(!confirm(`Reset limit emergency untuk ${username}?`)) return;
+  socket.emit('reset_emergency',{adminUsername:currentUser,targetUsername:username});
+}
+
+socket.on('reset_emergency_result',(data)=>{
+  if(data.success){
+    setAdminMsg(`✔ Limit emergency ${data.username} berhasil direset`,false);
+  }else{
+    setAdminMsg('✖ '+data.message,true);
+  }
+});
 
 async function adminDeleteChannel(channelId){
   if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
