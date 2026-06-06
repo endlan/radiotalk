@@ -455,7 +455,7 @@ function randomFreq(){return(155+Math.random()*5).toFixed(4);}
 // ===== STATE =====
 let currentUser=null, currentChannel=null, talkingUser=null;
 let channels=[], pendingJoinChannel=null, selectedType='public', isAdmin=false;
-
+const mutedUsersClient = new Set();
 // ===== AUTH =====
 function switchTab(tab){
   ['Login','Register'].forEach(t=>{
