@@ -943,7 +943,6 @@ function resetEmergency(username){
   if(!confirm(`Reset limit emergency untuk ${username}?`)) return;
   socket.emit('reset_emergency',{adminUsername:currentUser,targetUsername:username});
 }
-
 socket.on('reset_emergency_result',(data)=>{
   if(data.success){
     setAdminMsg(`✔ Limit emergency ${data.username} berhasil direset`,false);
@@ -951,6 +950,28 @@ socket.on('reset_emergency_result',(data)=>{
     setAdminMsg('✖ '+data.message,true);
   }
 });
+
+// TAMBAHKAN DI SINI:
+let emergencyCountClient = {};
+
+socket.on('emergency_counts_info', (data) => {
+  emergencyCountClient = data.counts || {};
+  loadAdminUsers();
+});
+
+socket.on('ptt_durasi_info', (data) => {
+  const input = document.getElementById('pttDurasiInput');
+  if(input) input.value = data.detik;
+});
+
+socket.on('set_ptt_durasi_result', (data) => {
+  setAdminMsg(data.success ? `✔ PTT durasi diset ${data.detik} detik` : '✖ '+data.message, !data.success);
+});
+
+function setPttDurasi() {
+  const detik = document.getElementById('pttDurasiInput').value;
+  socket.emit('set_ptt_durasi', { adminUsername: currentUser, detik: parseInt(detik) });
+}
 
 async function adminDeleteChannel(channelId){
   if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
