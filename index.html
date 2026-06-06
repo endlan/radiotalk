@@ -844,6 +844,8 @@ function clearBroadcast() {
 async function openAdminPanel(){
   openModal('modalAdmin');
   document.getElementById('adminMsg').textContent='';
+  socket.emit('get_emergency_counts', { adminUsername: currentUser });
+  socket.emit('get_ptt_durasi');
   await loadAdminUsers();
   await loadAdminChannels();
 }
