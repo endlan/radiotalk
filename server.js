@@ -235,7 +235,24 @@ io.on('connection', (socket) => {
   let isTalking = false;
   let pttLimitTimer = null;
 
-  socket.on('set_username', (username) => { 
+  socket.on('set_username', (username) => {
+  // Kick koneksi lama jika username sudah online di device lain
+  for (const [sid, otherSocket] of io.sockets.sockets) {
+    if (sid !== socket.id) {
+      // Cek apakah username ini sudah dipakai socket lain
+      let isOtherUser = false;
+      for (const chId of Object.keys(channelMembers)) {
+        if (channelMembers[chId][sid] === username) {
+          isOtherUser = true;
+          break;
+        }
+      }
+      if (isOtherUser) {
+        otherSocket.emit('kicked_duplicate', { reason: 'Akun kamu dibuka di perangkat lain' });
+        otherSocket.disconnect(true);
+      }
+    }
+  }
   currentUsername = username;
   if(broadcastMessage) socket.emit('broadcast_update', broadcastMessage);
 });
