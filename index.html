@@ -1084,10 +1084,7 @@ setTimeout(()=>document.body.style.border='',5000);
     const notif=document.createElement('div');
     notif.id='emergencyNotif';
     notif.style.cssText='position:absolute;inset:0;background:#1a0000;border-radius:inherit;border:1.5px solid #ff3333;display:flex;align-items:center;gap:10px;padding:8px 12px;z-index:10;animation:blinkBorder 0.6s ease infinite';
-    const gmapsUrl=lat&&lng?'https://www.google.com/maps?q='+lat+','+lng:'';
-if(gmapsUrl) notif.onclick=()=>window.open(gmapsUrl,'_blank');
-const mapUrl=lat&&lng?'https://www.openstreetmap.org/export/embed.html?bbox='+(lng-0.002)+','+(lat-0.002)+','+(lng+0.002)+','+(lat+0.002)+'&layer=mapnik&marker='+lat+','+lng:'';
-const gmapsUrl=lat&&lng?'https://www.google.com/maps?q='+lat+','+lng:'';
+   const gmapsUrl=lat&&lng?'https://www.google.com/maps?q='+lat+','+lng:'';
 if(gmapsUrl){notif.style.cursor='pointer';notif.onclick=()=>window.open(gmapsUrl,'_blank');}
 notif.innerHTML='<span style="font-size:18px;animation:pulse 0.8s ease infinite;display:inline-block">⚠️</span><div style="flex:1"><div style="font-size:10px;font-weight:700;color:#ff4444;font-family:monospace;letter-spacing:1px">⚠ EMERGENCY</div><div style="font-size:9px;color:#ff9999;font-family:monospace;margin-top:2px">Darurat '+username.toUpperCase()+' bth pertolongan</div>'+(gmapsUrl?'<div style="font-size:8px;color:#ffcc88;font-family:monospace;margin-top:3px">📍 '+lat.toFixed(4)+', '+lng.toFixed(4)+' - Tap Maps</div>':'')+'</div>';
     speakerArea.appendChild(notif);
