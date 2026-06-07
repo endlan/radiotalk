@@ -378,7 +378,17 @@ io.on('connection', (socket) => {
   if(!isAdmin) return;
   io.emit('emergency_cancelled');
 });
-
+socket.on('panic_alert', async ({username, type, label, lat, lng})=>{
+  io.emit('panic_broadcast', {username, type, label, lat, lng});
+  await admin.messaging().send({
+    topic: 'emergency',
+    notification: {
+      title: label+'!',
+      body: username.toUpperCase()+' melaporkan '+type+'!'
+    },
+    android: {priority:'high', notification:{sound:'default', channelId:'RadioTalkChannel'}}
+  }).catch(err=>console.log('FCM error:',err));
+});
   socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
     const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
     if (!isAdmin) {
