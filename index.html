@@ -982,8 +982,9 @@ async function adminUnban(targetUsername){
 }
 // TAMBAHKAN INI:
 function resetEmergency(username){
-  if(!confirm(`Reset limit emergency untuk ${username}?`)) return;
-  socket.emit('reset_emergency',{adminUsername:currentUser,targetUsername:username});
+  showConfirm('RESET EMERGENCY','Reset limit emergency untuk '+username+'?',()=>{
+    socket.emit('reset_emergency',{adminUsername:currentUser,targetUsername:username});
+  });
 }
 socket.on('reset_emergency_result',(data)=>{
   if(data.success){
