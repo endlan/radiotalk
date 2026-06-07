@@ -340,7 +340,7 @@ io.on('connection', (socket) => {
     io.emit('channel_update', { channelId: channel, memberCount: members.length, members });
   });
 
-  socket.on('emergency_start', async ({username, lat, lng}) => {
+  socket.on('emergency_start', async ({username, lat, lng, address}) => {
     if(username !== 'Endri') {
       if((emergencyCount[username] || 0) >= 2) {
         socket.emit('emergency_limit', 'Batas emergency harian sudah tercapai');
@@ -348,7 +348,7 @@ io.on('connection', (socket) => {
       }
       emergencyCount[username] = (emergencyCount[username] || 0) + 1;
     }
-    io.emit('emergency_alert', {username, lat, lng});
+    io.emit('emergency_alert', {username, lat, lng, address});
     await admin.messaging().send({
       topic: 'emergency',
       notification: {
