@@ -939,7 +939,7 @@ async function loadAdminChannels(){
 
 async function adminKick(targetUsername){
   if(!currentChannel){setAdminMsg('⚠ Kamu belum di channel manapun!',true);return;}
-  if(!confirm(`Kick ${targetUsername} dari ${currentChannel}?`)) return;
+  showConfirm('KICK USER','Kick '+targetUsername+' dari channel ini?',()=>{
   try{
     const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
     const d=await r.json();
