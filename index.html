@@ -892,15 +892,25 @@ function stopAllEmergency(){
 function openPanicModal(){
   openModal('modalPanic');
 }
-function sendPanic(type, label, color, bg){
+async function sendPanic(type, label, color, bg){
   closeModal('modalPanic');
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      pos=>{socket.emit('panic_alert',{username:currentUser,type,label,lat:pos.coords.latitude,lng:pos.coords.longitude});},
-      ()=>{socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null});}
+      async pos=>{
+        const lat=pos.coords.latitude;
+        const lng=pos.coords.longitude;
+        let address='';
+        try{
+          const r=await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json');
+          const d=await r.json();
+          address=d.address.road||d.address.suburb||d.address.village||d.address.county||'';
+        }catch(e){}
+        socket.emit('panic_alert',{username:currentUser,type,label,lat,lng,address});
+      },
+      ()=>{socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null,address:''});}
     );
   }else{
-    socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null});
+    socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null,address:''});
   }
 }
 async function loadAdminUsers(){
