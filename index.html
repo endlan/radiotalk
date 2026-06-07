@@ -269,6 +269,10 @@
         <div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>
       </div>
     </div>
+<div class="admin-section>
+  <div class="admin-section-title">▷ EMERGENCY</div>
+  <button class="admin-action-btn" style="background:#8b0000;color:#ff4444;width:100%;padding:8px;" onclick="stopAllEmergency()">🚨 STOP SEMUA EMERGENCY</button>
+</div>
 <div class="admin-section">
   <div class="admin-section-title">▷ PTT DURASI</div>
   <div style="display:flex;align-items:center;gap:6px;padding:4px 0">
@@ -849,6 +853,9 @@ async function openAdminPanel(){
   await loadAdminUsers();
   await loadAdminChannels();
 }
+function stopAllEmergency(){
+  socket.emit('emergency_cancel', {adminUsername: currentUser});
+}
 
 async function loadAdminUsers(){
   const list=document.getElementById('adminUserList');
@@ -1103,6 +1110,11 @@ notif.innerHTML='<span style="font-size:18px;animation:pulse 0.8s ease infinite;
 });
 socket.on('emergency_limit', (pesan) => {
   alert(pesan);
+});
+  socket.on('emergency_cancelled', ()=>{
+  const notif = document.getElementById('emergencyNotif');
+  if(notif) notif.remove();
+  document.body.style.border='';
 });
 socket.on('broadcast_update', (pesan) => {
   const el = document.getElementById('broadcastMsg');
