@@ -1015,13 +1015,14 @@ function setPttDurasi() {
 }
 
 async function adminDeleteChannel(channelId){
-  if(!confirm(`Hapus channel "${channelId}"? Semua user akan dikeluarkan.`)) return;
-  try{
-    const r=await fetch(`https://radiotalk-production-8d66.up.railway.app/admin/channel/${channelId}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser})});
-    const d=await r.json();
-    setAdminMsg(d.success?`✔ Channel ${channelId} dihapus!`:'✖ '+d.message,!d.success);
-    if(d.success){await loadAdminChannels();await loadChannels();}
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  showConfirm('HAPUS CHANNEL','Hapus channel "'+channelId+'"? Semua user akan dikeluarkan.',async ()=>{
+    try{
+      const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/channel/'+channelId,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser})});
+      const d=await r.json();
+      setAdminMsg(d.success?'✔ Channel '+channelId+' dihapus!':'✖ '+d.message,!d.success);
+      if(d.success){await loadAdminChannels();await loadChannels();}
+    }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  });
 }
 
 function setAdminMsg(msg,isErr){
