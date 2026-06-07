@@ -1145,6 +1145,7 @@ setTimeout(()=>document.body.style.border='',5000);
 if(gmapsUrl){notif.style.cursor='pointer';notif.onclick=()=>window.open(gmapsUrl,'_blank');}
 notif.innerHTML='<span style="font-size:18px;animation:pulse 0.8s ease infinite;display:inline-block">⚠️</span><div style="flex:1"><div style="font-size:10px;font-weight:700;color:#ff4444;font-family:monospace;letter-spacing:1px">⚠ EMERGENCY</div><div style="font-size:9px;color:#ff9999;font-family:monospace;margin-top:2px">Darurat '+username.toUpperCase()+' bth pertolongan</div>'+(gmapsUrl?'<div style="font-size:8px;color:#ffcc88;font-family:monospace;margin-top:3px">📍 '+lat.toFixed(4)+', '+lng.toFixed(4)+' - Tap Maps</div>':'')+'</div>';
     speakerArea.appendChild(notif);
+    try{const siren=new Audio('https://radiotalk-production-8d66.up.railway.app/emergency_alert.wav');siren.volume=1.0;const pp=siren.play();if(pp!==undefined){pp.catch(e=>{document.addEventListener('touchstart',()=>siren.play(),{once:true});});}}catch(e){}
     setTimeout(()=>{notif.remove();document.body.style.border='';},300000);
   }
   try {
@@ -1178,6 +1179,7 @@ socket.on('emergency_limit', (pesan) => {
     if(gmapsUrl){notif.style.cursor='pointer';notif.onclick=()=>window.open(gmapsUrl,'_blank');}
     notif.innerHTML='<span style="font-size:18px;animation:pulse 0.8s ease infinite;display:inline-block">'+label.split(' ')[0]+'</span><div style="flex:1"><div style="font-size:10px;font-weight:700;color:#aa44ff;font-family:monospace;letter-spacing:1px">'+label+'</div><div style="font-size:9px;color:#cc88ff;font-family:monospace;margin-top:2px">'+username.toUpperCase()+' melaporkan!</div>'+(gmapsUrl?'<div style="font-size:8px;color:#ffcc88;font-family:monospace;margin-top:3px">📍 Tap untuk buka Maps</div>':'')+'</div>';
     speakerArea.appendChild(notif);
+    try{const siren=new Audio('https://radiotalk-production-8d66.up.railway.app/emergency_alert.wav');siren.volume=1.0;const pp=siren.play();if(pp!==undefined){pp.catch(e=>{document.addEventListener('touchstart',()=>siren.play(),{once:true});});}}catch(e){}
     setTimeout(()=>notif.remove(),300000);
   }
 });
