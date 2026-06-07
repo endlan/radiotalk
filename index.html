@@ -454,7 +454,7 @@
       <!-- PTT -->
       <div class="ptt-section">
         <div class="ptt-ring">
-          <div class="ptt-disabled" id="pttDisabled"><div class="ptt-disabled-text">MASUK<br>CHANNEL<br>FIRST</div></div>
+          <div class="ptt-disabled" id="pttDisabled"><div class="ptt-disabled-text">GABUNG<br>CHANNEL<br>FIRST</div></div>
           <button class="ptt-btn" id="pttBtn"
             ontouchstart="startTalk(event)" ontouchend="stopTalk(event)"
             onmousedown="startTalk(event)" onmouseup="stopTalk(event)">
@@ -589,7 +589,7 @@ function renderChannels(){
         </div>
       </div>
       <button class="ch-action" onclick="handleJoin('${ch.id}','${ch.type}')">
-        ${isActive?'ON AIR':isPriv?'🔑 KUNCI':'MASUK'}
+        ${isActive?'ON AIR':isPriv?'🔑 KUNCI':'GABUNG'}
       </button>
     `;
     list.appendChild(div);
