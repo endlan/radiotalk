@@ -1151,7 +1151,7 @@ function stopEmergency(e){
   if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
   document.getElementById('emergencyBtn').classList.remove('active');
 }
-socket.on('emergency_alert',({username,lat,lng})=>{
+socket.on('emergency_alert',({username,lat,lng,address})=>{
   document.body.style.border='4px solid red';
 setTimeout(()=>document.body.style.border='',5000);
   const speakerArea=document.querySelector('.speaker');
