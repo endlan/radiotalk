@@ -378,8 +378,8 @@ io.on('connection', (socket) => {
   if(!isAdmin) return;
   io.emit('emergency_cancelled');
 });
-socket.on('panic_alert', async ({username, type, label, lat, lng})=>{
-  io.emit('panic_broadcast', {username, type, label, lat, lng});
+socket.on('panic_alert', async ({username, type, label, lat, lng, address})=>{
+  io.emit('panic_broadcast', {username, type, label, lat, lng, address});
   await admin.messaging().send({
     topic: 'emergency',
     notification: {
