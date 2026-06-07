@@ -372,6 +372,12 @@ io.on('connection', (socket) => {
   socket.on('emergency_end', (username) => {
     io.emit('emergency_stop', {username});
   });
+  
+  socket.on('emergency_cancel', async ({adminUsername})=>{
+  const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
+  if(!isAdmin) return;
+  io.emit('emergency_cancelled');
+});
 
   socket.on('reset_emergency', async ({ adminUsername, targetUsername }) => {
     const isAdmin = adminUsername === 'Endri' || await checkAdmin(adminUsername);
