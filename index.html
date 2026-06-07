@@ -961,13 +961,14 @@ function toggleMute(targetUsername, btn) {
   }
 }
 async function adminBan(targetUsername){
-  if(!confirm(`Ban ${targetUsername}? User ini tidak bisa login lagi.`)) return;
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/ban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
-    const d=await r.json();
-    setAdminMsg(d.success?`✔ ${targetUsername} dibanned!`:'✖ '+d.message,!d.success);
-    if(d.success) await loadAdminUsers();
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  showConfirm('BAN USER','Ban '+targetUsername+'? User ini tidak bisa login lagi.',async ()=>{
+    try{
+      const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/ban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername})});
+      const d=await r.json();
+      setAdminMsg(d.success?'✔ '+targetUsername+' dibanned!':'✖ '+d.message,!d.success);
+      if(d.success) await loadAdminUsers();
+    }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  });
 }
 
 async function adminUnban(targetUsername){
