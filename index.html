@@ -877,6 +877,13 @@ async function openAdminPanel(){
   await loadAdminUsers();
   await loadAdminChannels();
 }
+  function showConfirm(title, msg, onOk){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').textContent=msg;
+  openModal('modalConfirm');
+  document.getElementById('confirmOk').onclick=()=>{closeModal('modalConfirm');onOk();};
+  document.getElementById('confirmCancel').onclick=()=>closeModal('modalConfirm');
+}
 function stopAllEmergency(){
   socket.emit('emergency_cancel', {adminUsername: currentUser});
 }
