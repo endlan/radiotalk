@@ -65,8 +65,8 @@
     /* AUTH */
     .auth-screen{position:relative;z-index:1}
     .auth-tabs{display:flex;gap:4px;margin-bottom:10px}
-    .auth-tab{flex:1;background:#0d0d0d;border:1px solid #333;border-radius:5px;padding:6px;color:#555;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;cursor:pointer;text-align:center;transition:all 0.2s}
-    .auth-tab.active{background:rgba(255,106,0,0.1);border-color:var(--orange);color:var(--orange);text-shadow:0 0 6px var(--orange-glow)}
+    .auth-tab{flex:1;background:rgba(255,106,0,0.1);border:1px solid var(--orange);border-radius:5px;padding:6px;color:var(--orange);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;cursor:pointer;text-align:center;transition:all 0.2s;text-shadow:0 0 6px var(--orange-glow)}
+    .auth-tab.active{background:rgba(255,106,0,0.2);border-color:var(--orange);color:var(--orange);box-shadow:0 0 8px rgba(255,106,0,0.3)}
     .auth-form{display:none} .auth-form.active{display:block}
     .auth-field{margin-bottom:8px}
     .auth-field-label{font-size:7px;color:var(--orange);letter-spacing:2px;margin-bottom:3px}
