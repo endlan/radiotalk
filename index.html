@@ -889,7 +889,20 @@ async function openAdminPanel(){
 function stopAllEmergency(){
   socket.emit('emergency_cancel', {adminUsername: currentUser});
 }
-
+function openPanicModal(){
+  openModal('modalPanic');
+}
+function sendPanic(type, label, color, bg){
+  closeModal('modalPanic');
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>{socket.emit('panic_alert',{username:currentUser,type,label,lat:pos.coords.latitude,lng:pos.coords.longitude});},
+      ()=>{socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null});}
+    );
+  }else{
+    socket.emit('panic_alert',{username:currentUser,type,label,lat:null,lng:null});
+  }
+}
 async function loadAdminUsers(){
   const list=document.getElementById('adminUserList');
   list.innerHTML='<div style="font-size:9px;color:#444;text-align:center;padding:8px">... MEMUAT ...</div>';
