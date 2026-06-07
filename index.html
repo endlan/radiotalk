@@ -939,13 +939,14 @@ async function loadAdminChannels(){
 
 async function adminKick(targetUsername){
   if(!currentChannel){setAdminMsg('⚠ Kamu belum di channel manapun!',true);return;}
-  showConfirm('KICK USER','Kick '+targetUsername+' dari channel ini?',()=>{
-  try{
-    const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
-    const d=await r.json();
-    setAdminMsg(d.success?`✔ ${targetUsername} dikick!`:'✖ '+d.message,!d.success);
-    if(d.success) await loadAdminUsers();
-  }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  showConfirm('KICK USER','Kick '+targetUsername+' dari channel ini?',async ()=>{
+    try{
+      const r=await fetch('https://radiotalk-production-8d66.up.railway.app/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:currentUser,targetUsername,channelId:currentChannel})});
+      const d=await r.json();
+      setAdminMsg(d.success?'✔ '+targetUsername+' dikick!':'✖ '+d.message,!d.success);
+      if(d.success) await loadAdminUsers();
+    }catch{setAdminMsg('✖ SERVER ERROR',true);}
+  });
 }
 function toggleMute(targetUsername, btn) {
   if(mutedUsersClient.has(targetUsername)) {
