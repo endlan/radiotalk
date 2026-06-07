@@ -467,17 +467,16 @@
 
       <!-- EMERGENCY BUTTON -->
       <div class="emergency-section">
-        <button class="emergency-btn" id="emergencyBtn"
-          ontouchstart="startEmergency(event)" ontouchend="stopEmergency(event)"
-          onmousedown="startEmergency(event)" onmouseup="stopEmergency(event)">
-          <div class="emergency-icon">⚠️</div>
-          <div class="emergency-label">EMERGENCY</div>
-        </button>
-      </div>
-    </div>
-
-    <div class="model-plate"><div class="model-text">RT-2600 ◈ VHF/UHF</div></div>
-  </div>
+  <button class="emergency-btn" id="emergencyBtn"
+    ontouchstart="startEmergency(event)" ontouchend="stopEmergency(event)"
+    onmousedown="startEmergency(event)" onmouseup="stopEmergency(event)">
+    <div class="emergency-icon">⚠️</div>
+    <div class="emergency-label">EMERGENCY</div>
+  </button>
+  <button class="panic-btn-main" id="panicBtn" onclick="openPanicModal()">
+    <div class="emergency-icon">🚨</div>
+    <div class="emergency-label">PANIC</div>
+  </button>
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
