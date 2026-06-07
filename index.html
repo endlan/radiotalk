@@ -310,6 +310,24 @@
     </div>
   </div>
 </div>
+  <div class="modal-overlay" id="modalPanic">
+  <div class="modal-box" style="max-width:280px">
+    <div class="modal-title">🚨 PILIH KATEGORI</div>
+    <div class="panic-option" onclick="sendPanic('kebakaran','🔥 KEBAKARAN','#ff4400','#1a0800')">
+      <span style="font-size:20px">🔥</span>
+      <div><div style="font-size:10px;font-weight:700;color:#ff8844;font-family:monospace;letter-spacing:1px">KEBAKARAN</div><div style="font-size:8px;color:#ff6622;font-family:monospace;margin-top:2px">Laporkan kebakaran</div></div>
+    </div>
+    <div class="panic-option" onclick="sendPanic('maling','🚨 MALING','#4444ff','#00001a')">
+      <span style="font-size:20px">🚨</span>
+      <div><div style="font-size:10px;font-weight:700;color:#8888ff;font-family:monospace;letter-spacing:1px">MALING</div><div style="font-size:8px;color:#6666ff;font-family:monospace;margin-top:2px">Laporkan pencurian</div></div>
+    </div>
+    <div class="panic-option" onclick="sendPanic('medis','🚑 MEDIS','#00aa44','#001a00')">
+      <span style="font-size:20px">🚑</span>
+      <div><div style="font-size:10px;font-weight:700;color:#44ff88;font-family:monospace;letter-spacing:1px">MEDIS</div><div style="font-size:8px;color:#22cc66;font-family:monospace;margin-top:2px">Butuh bantuan medis</div></div>
+    </div>
+    <button class="btn-cancel" style="width:100%;margin-top:8px" onclick="closeModal('modalPanic')">BATAL</button>
+  </div>
+</div>
 <!-- MODALS -->
 <div class="modal-overlay" id="modalCreate">
   <div class="modal-box">
