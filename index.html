@@ -455,12 +455,12 @@
 // ===== FIREBASE CONFIG =====
 // GANTI NILAI DI BAWAH INI DENGAN FIREBASE CONFIG KAMU
 const firebaseConfig = {
-  apiKey: "AIzaSyAHjV4ouHce9feeOGS-7XhpxUy8HLE6yAA",
+  apiKey: ***,
   authDomain: "walkietalkie-dc92d.firebaseapp.com",
   projectId: "walkietalkie-dc92d",
   storageBucket: "walkietalkie-dc92d.firebasestorage.app",
-  messagingSenderId: "696467898469",
-  appId: "1:696467898469:web:c1a1a6a303b7429a6d868c",
+  messagingSenderId: ****,
+  appId: *****
   databaseURL: "https://walkietalkie-dc92d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 firebase.initializeApp(firebaseConfig);
@@ -492,6 +492,7 @@ let pttStateListener = null;
 let broadcastListener = null;
 let emergencyListener = null;
 let peerConnection = null;
+let peerConnections = new Map();
 let localStream = null;
 let mediaRecorder, audioChunks = [];
 let isEmergencyActive = false;
@@ -854,7 +855,8 @@ pc.oniceconnectionstatechange=e=>{
 }
 
 async function handleOffer(data,fromUser,chId){
-  const pc=await createPeerConnection(fromUser,chId);  // ← pakai const pc, bukan peerConnection
+  const pc=await createPeerConnection(fromUser,chId);
+  peerConnections.set(fromUser,pc);  // ← pakai const pc, bukan peerConnection
   await pc.setRemoteDescription(new RTCSessionDescription({type:'offer',sdp:data.sdp}));
   
   try{
@@ -870,17 +872,19 @@ async function handleOffer(data,fromUser,chId){
 }
 
 async function handleAnswer(data){
-  if(peerConnection){
-    console.log('PEER STATE BEFORE ANSWER:', peerConnection.signalingState);
-    await peerConnection.setRemoteDescription(new RTCSessionDescription({type:'answer',sdp:data.sdp}));
-    console.log('PEER STATE AFTER ANSWER:', peerConnection.signalingState);
-    console.log('ICE STATE IN ANSWER:', peerConnection.iceConnectionState);
+  const pc=peerConnections.get(data.from);
+  if(pc){
+    console.log('PEER STATE BEFORE ANSWER:', pc.signalingState);
+    await pc.setRemoteDescription(new RTCSessionDescription({type:'answer',sdp:data.sdp}));
+    console.log('PEER STATE AFTER ANSWER:', pc.signalingState);
+    console.log('ICE STATE IN ANSWER:', pc.iceConnectionState);
   }
 }
 
 async function handleIce(data){
-  if(peerConnection&&data.candidate){
-    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+  const pc=peerConnections.get(data.from);
+  if(pc&&data.candidate){
+    await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
   }
 }
 
@@ -919,10 +923,11 @@ async function startTalk(e){
     const members=membersSnap.val()||{};
     for(const memberKey of Object.keys(members)){
       if(memberKey===currentUser) continue;
-      peerConnection=await createPeerConnection(memberKey,currentChannel);
-      localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
-      const offer=await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
+      const pc=await createPeerConnection(memberKey,currentChannel);
+      peerConnections.set(memberKey,pc);
+      localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
+      const offer=await pc.createOffer();
+      await pc.setLocalDescription(offer);
       db.ref('channels/'+currentChannel+'/signaling/'+currentUser).set({
         type:'offer',target:memberKey,sdp:offer.sdp,from:currentUser,timestamp:Date.now()
       });
