@@ -3,7 +3,7 @@
   "appName": "RadioTalk",
   "webDir": "www",
   "server": {
-    "url": "https://radiotalk-production-8d66.up.railway.app",
+    "url": "https://walkietalkie-dc92d.web.app",
     "cleartext": true
   },
   "android": {
