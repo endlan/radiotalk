@@ -455,7 +455,7 @@
 // ===== FIREBASE CONFIG =====
 // GANTI NILAI DI BAWAH INI DENGAN FIREBASE CONFIG KAMU
 const firebaseConfig = {
-  aapiKey: "AIzaSyAHjV4ouHce9feeOGS-7XhpxUy8HLE6yAA",
+  apiKey: "AIzaSyAHjV4ouHce9feeOGS-7XhpxUy8HLE6yAA",
   authDomain: "walkietalkie-dc92d.firebaseapp.com",
   projectId: "walkietalkie-dc92d",
   storageBucket: "walkietalkie-dc92d.firebasestorage.app",
@@ -500,7 +500,17 @@ let isEmergencyActive = false;
 const rtcConfig = {
   iceServers: [
     {urls:'stun:stun.l.google.com:19302'},
-    {urls:'stun:stun1.l.google.com:19302'}
+    {urls:'stun:stun1.l.google.com:19302'},
+    {
+      urls:'turn:openrelay.metered.ca:80',
+      username:'openrelayproject',
+      credential:'openrelayproject'
+    },
+    {
+      urls:'turn:openrelay.metered.ca:443',
+      username:'openrelayproject',
+      credential:'openrelayproject'
+    }
   ]
 };
 
@@ -788,13 +798,17 @@ function updateMemberTalking(username){
 
 // ===== WEBRTC AUDIO =====
 function listenWebRTCSignaling(chId){
-  // Listen untuk offer/answer dari user lain
+  const startTime = Date.now();  // ← tambah ini
   db.ref('channels/'+chId+'/signaling').on('child_added',async snap=>{
     const data=snap.val();
+    console.log('SIGNALING RECEIVED:', snap.key, data);
     if(!data||snap.key===currentUser) return;
+    if(data.timestamp && data.timestamp < startTime) return;  // ← tambah ini, skip data lama
     if(data.type==='offer'&&data.target===currentUser){
+      console.log('HANDLING OFFER from:', snap.key);
       await handleOffer(data,snap.key,chId);
     }else if(data.type==='answer'&&data.target===currentUser){
+      console.log('HANDLING ANSWER');
       await handleAnswer(data);
     }else if(data.type==='ice'&&data.target===currentUser){
       await handleIce(data);
@@ -805,25 +819,51 @@ function listenWebRTCSignaling(chId){
 async function createPeerConnection(targetUser,chId){
   const pc=new RTCPeerConnection(rtcConfig);
   pc.onicecandidate=e=>{
-    if(e.candidate){
-      db.ref('channels/'+chId+'/signaling/'+currentUser).set({
-        type:'ice',target:targetUser,candidate:e.candidate.toJSON(),from:currentUser,timestamp:Date.now()
-      });
-    }
-  };
+  if(e.candidate){
+    db.ref('channels/'+chId+'/signaling/'+currentUser).set({
+      type:'ice',target:targetUser,candidate:e.candidate.toJSON(),from:currentUser,timestamp:Date.now()
+    });
+  }
+};
+pc.onconnectionstatechange=e=>{
+  console.log('CONNECTION STATE:', pc.connectionState);
+};
+pc.oniceconnectionstatechange=e=>{
+  console.log('ICE STATE:', pc.iceConnectionState);
+};
   pc.ontrack=e=>{
-    const audio=new Audio();
+    console.log('ONTRACK FIRED:', e.streams);
+    let audio=document.getElementById('remoteAudio');
+    if(!audio){
+      audio=document.createElement('audio');
+      audio.id='remoteAudio';
+      audio.autoplay=true;
+      document.body.appendChild(audio);
+    }
     audio.srcObject=e.streams[0];
-    audio.play().catch(err=>console.log('Audio play error:',err));
+    audio.muted=false;
+    audio.volume=1.0;
+  audio.play().then(()=>{
+      console.log('Audio playing OK');
+    }).catch(err=>{
+      console.log('Audio play error:',err);
+      document.addEventListener('click', ()=>audio.play(), {once:true});
+    });
   };
   return pc;
 }
 
 async function handleOffer(data,fromUser,chId){
-  peerConnection=await createPeerConnection(fromUser,chId);
-  await peerConnection.setRemoteDescription(new RTCSessionDescription({type:'offer',sdp:data.sdp}));
-  const answer=await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
+  const pc=await createPeerConnection(fromUser,chId);  // ← pakai const pc, bukan peerConnection
+  await pc.setRemoteDescription(new RTCSessionDescription({type:'offer',sdp:data.sdp}));
+  
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));  // ← pc
+  }catch(e){console.log('mic error on answer:',e);}
+  
+  const answer=await pc.createAnswer();  // ← pc
+  await pc.setLocalDescription(answer);  // ← pc
   db.ref('channels/'+chId+'/signaling/'+currentUser).set({
     type:'answer',target:fromUser,sdp:answer.sdp,from:currentUser,timestamp:Date.now()
   });
@@ -831,7 +871,9 @@ async function handleOffer(data,fromUser,chId){
 
 async function handleAnswer(data){
   if(peerConnection){
+    console.log('PEER STATE BEFORE ANSWER:', peerConnection.signalingState);
     await peerConnection.setRemoteDescription(new RTCSessionDescription({type:'answer',sdp:data.sdp}));
+    console.log('PEER STATE AFTER ANSWER:', peerConnection.signalingState);
   }
 }
 
@@ -973,6 +1015,7 @@ function showConfirm(title,msg,onOk){
 // ===== BROADCAST =====
 function listenBroadcast(){
   broadcastListener=db.ref('broadcast').on('value',snap=>{
+    if(!snap || !snap.exists()) return;
     const pesan=snap.val()||'';
     const el=document.getElementById('broadcastMsg');
     if(el){el.textContent=pesan?'📢 '+pesan:'';el.style.display=pesan?'block':'none';}
@@ -996,6 +1039,7 @@ function clearBroadcast(){
 // ===== EMERGENCY =====
 function listenEmergency(){
   emergencyListener=db.ref('emergency/active').on('value',snap=>{
+    if(!snap || !snap.exists()) return;
     const data=snap.val();
     if(!data||!data.active) return;
     showEmergencyAlert(data.username,data.lat,data.lng,data.address);
