@@ -491,6 +491,7 @@ let channelMembersListener = null;
 let pttStateListener = null;
 let broadcastListener = null;
 let emergencyListener = null;
+let panicListener = null;
 let peerConnection = null;
 let peerConnections = new Map();
 let localStream = null;
@@ -601,6 +602,7 @@ function doLogout(){
   currentUser=null; currentChannel=null; isAdmin=false;
   if(broadcastListener) broadcastListener();
   if(emergencyListener) emergencyListener();
+  if(panicListener) panicListener();
   document.getElementById('adminPanelBtn').classList.remove('show');
   document.getElementById('authScreen').style.display='block';
   document.getElementById('mainApp').style.display='none';
@@ -1060,9 +1062,11 @@ function listenEmergency(){
 }
 
 function listenPanic(){
-  db.ref('panic/latest').on('value',snap=>{
+  const startTime=Date.now();
+  panicListener=db.ref('panic/latest').on('value',snap=>{
     const data=snap.val();
     if(!data) return;
+    if(data.timestamp && data.timestamp < startTime) return;
     showPanicAlert(data.username,data.label,data.lat,data.lng,data.address);
   });
 }
