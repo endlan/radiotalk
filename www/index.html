@@ -904,6 +904,10 @@ async function startTalk(e){
   const pttData=pttSnap.val();
   const now=Date.now();
   if(pttData&&pttData.isBusy&&pttData.talkingUser!==currentUser){
+  document.getElementById('statusBadge').textContent=pttData.talkingUser+' SEDANG BICARA';
+  setTimeout(()=>{if(currentChannel)document.getElementById('statusBadge').textContent='CONNECTED';},2000);
+  return;
+}
    
   if(pttData&&pttData.cooldownUntil&&pttData.cooldownUntil>now){
     const sisa=Math.ceil((pttData.cooldownUntil-now)/1000);
@@ -928,7 +932,7 @@ async function startTalk(e){
       const offer=await pc.createOffer();
       await pc.setLocalDescription(offer);
       db.ref('channels/'+currentChannel+'/signaling/'+currentUser+'_offer_'+memberKey).set({
-        type:'offer',target:memberKey,sdp:offer.sdp,from:currentUser,timestamp:Date.now()
+      type:'offer',target:memberKey,sdp:offer.sdp,from:currentUser,timestamp:Date.now()
       });
     }
     // PTT timeout
