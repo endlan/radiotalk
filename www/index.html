@@ -874,6 +874,7 @@ async function handleAnswer(data){
     console.log('PEER STATE BEFORE ANSWER:', peerConnection.signalingState);
     await peerConnection.setRemoteDescription(new RTCSessionDescription({type:'answer',sdp:data.sdp}));
     console.log('PEER STATE AFTER ANSWER:', peerConnection.signalingState);
+    console.log('ICE STATE IN ANSWER:', peerConnection.iceConnectionState);
   }
 }
 
