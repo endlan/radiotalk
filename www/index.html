@@ -834,6 +834,10 @@ pc.oniceconnectionstatechange=e=>{
 };
   pc.ontrack=e=>{
     console.log('ONTRACK FIRED:', e.streams);
+    console.log('TRACK KIND:', e.track.kind);
+    console.log('TRACK ENABLED:', e.track.enabled);
+    console.log('TRACK MUTED:', e.track.muted);
+    console.log('STREAM ACTIVE:', e.streams[0]?.active);
     let audio=document.getElementById('remoteAudio');
     if(!audio){
       audio=document.createElement('audio');
