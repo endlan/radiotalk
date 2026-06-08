@@ -889,7 +889,9 @@ async function handleIce(data){
 }
 
 function stopWebRTC(){
-  if(peerConnection){peerConnection.close();peerConnection=null;}
+  peerConnections.forEach(pc=>pc.close());
+  peerConnections.clear();
+  peerConnection=null;
   if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
 }
 
