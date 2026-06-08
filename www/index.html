@@ -807,7 +807,7 @@ function listenWebRTCSignaling(chId){
     if(data.timestamp && data.timestamp < startTime) return;  // ← tambah ini, skip data lama
     if(data.type==='offer'&&data.target===currentUser){
       console.log('HANDLING OFFER from:', snap.key);
-      await handleOffer(data,snap.key,chId);
+      await handleOffer(data,data.from,chId);
     }else if(data.type==='answer'&&data.target===currentUser){
       console.log('HANDLING ANSWER');
       await handleAnswer(data);
