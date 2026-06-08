@@ -821,9 +821,9 @@ async function createPeerConnection(targetUser,chId){
   const pc=new RTCPeerConnection(rtcConfig);
   pc.onicecandidate=e=>{
   if(e.candidate){
-    db.ref('channels/'+chId+'/signaling/'+currentUser).set({
-      type:'ice',target:targetUser,candidate:e.candidate.toJSON(),from:currentUser,timestamp:Date.now()
-    });
+    db.ref('channels/'+chId+'/signaling/'+currentUser+'_ice_'+targetUser+'_'+Date.now()).set({
+  type:'ice',target:targetUser,candidate:e.candidate.toJSON(),from:currentUser,timestamp:Date.now()
+});
   }
 };
 pc.onconnectionstatechange=e=>{
@@ -866,9 +866,9 @@ async function handleOffer(data,fromUser,chId){
   
   const answer=await pc.createAnswer();  // ← pc
   await pc.setLocalDescription(answer);  // ← pc
-  db.ref('channels/'+chId+'/signaling/'+currentUser).set({
-    type:'answer',target:fromUser,sdp:answer.sdp,from:currentUser,timestamp:Date.now()
-  });
+  db.ref('channels/'+chId+'/signaling/'+currentUser+'_answer_'+fromUser).set({
+  type:'answer',target:fromUser,sdp:answer.sdp,from:currentUser,timestamp:Date.now()
+});
 }
 
 async function handleAnswer(data){
@@ -930,9 +930,9 @@ async function startTalk(e){
       localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
       const offer=await pc.createOffer();
       await pc.setLocalDescription(offer);
-      db.ref('channels/'+currentChannel+'/signaling/'+currentUser).set({
-        type:'offer',target:memberKey,sdp:offer.sdp,from:currentUser,timestamp:Date.now()
-      });
+      db.ref('channels/'+currentChannel+'/signaling/'+currentUser+'_offer_'+memberKey).set({
+      type:'offer',target:memberKey,sdp:offer.sdp,from:currentUser,timestamp:Date.now()
+    });
     }
     // PTT timeout
     setTimeout(async()=>{
