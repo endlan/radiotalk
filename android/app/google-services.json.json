@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "696467898469",
+    "project_id": "walkietalkie-dc92d",
+    "storage_bucket": "walkietalkie-dc92d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696467898469:android:b089aed48f2ede0b6d868c",
+        "android_client_info": {
+          "package_name": "com.radiotalk.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZATsvDFedChgzKdGakATTrbqpIsEqgHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
