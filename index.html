@@ -834,28 +834,32 @@ pc.oniceconnectionstatechange=e=>{
   console.log('ICE STATE:', pc.iceConnectionState);
 };
   pc.ontrack=e=>{
-    console.log('ONTRACK FIRED:', e.streams);
-    console.log('TRACK KIND:', e.track.kind);
-    console.log('TRACK ENABLED:', e.track.enabled);
-    console.log('TRACK MUTED:', e.track.muted);
-    console.log('STREAM ACTIVE:', e.streams[0]?.active);
-    let audio=document.getElementById('remoteAudio');
-    if(!audio){
-      audio=document.createElement('audio');
-      audio.id='remoteAudio';
-      audio.autoplay=true;
-      document.body.appendChild(audio);
-    }
-    audio.srcObject=e.streams[0];
-    audio.muted=false;
-    audio.volume=1.0;
-  audio.play().then(()=>{
-      console.log('Audio playing OK');
-    }).catch(err=>{
-      console.log('Audio play error:',err);
-      document.addEventListener('click', ()=>audio.play(), {once:true});
-    });
+  console.log('ONTRACK FIRED:', e.streams);
+  console.log('TRACK KIND:', e.track.kind);
+  console.log('TRACK ENABLED:', e.track.enabled);
+  console.log('TRACK MUTED:', e.track.muted);
+  console.log('STREAM ACTIVE:', e.streams[0]?.active);
+  let audio=document.getElementById('remoteAudio');
+  if(!audio){
+    audio=document.createElement('audio');
+    audio.id='remoteAudio';
+    audio.autoplay=true;
+    document.body.appendChild(audio);
+  }
+  audio.srcObject=e.streams[0];
+  audio.muted=false;
+  audio.volume=1.0;
+  e.track.onunmute=()=>{
+    console.log('TRACK UNMUTED!');
+    audio.play().catch(err=>console.log('play error:',err));
   };
+  audio.play().then(()=>{
+    console.log('Audio playing OK');
+  }).catch(err=>{
+    console.log('Audio play error:',err);
+    document.addEventListener('click',()=>audio.play(),{once:true});
+  });
+};
   return pc;
 }
 
